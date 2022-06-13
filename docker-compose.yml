@@ -1,0 +1,43 @@
+version: "3"
+services:
+  go_ops:
+    container_name: go_ops
+    build: .
+    tty: true
+    volumes:
+      - .:/go/src/work
+  go_ops_db:
+    container_name: go_ops_db
+    image: mysql:5.7.25
+    volumes:
+      - "./mysql/storage:/var/lib/mysql"
+      - "./mysql/setup/conf:/etc/mysql/conf.d"
+      - "./mysql/setup/entrypoint:/docker-entrypoint-initdb.d"
+      #- "./mysql/setup/ddl:/docker-entrypoint-initdb.d/ddl"
+    environment:
+      - MYSQL_USER=opsuser
+      - MYSQL_PASSWORD=opspasswd
+      - MYSQL_ROOT_PASSWORD=rootpasswd
+      - TZ=Asia/Tokyo
+    networks:
+      - default
+      - go_ops_network
+  go_ops_phpmyadmin:
+    container_name: go_ops_phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    volumes:
+      - "./phpmyadmin/setup/conf/upload.ini:/usr/local/etc/php/conf.d/upload.ini"
+    environment:
+      - PMA_ARBITRARY=0
+      - PMA_HOSTS=go_ops_db
+    links:
+      - go_ops_db
+    ports:
+      - 13902:80
+    networks:
+      - default
+      - go_ops_network
+
+networks:
+  go_ops_network:
+    external: true

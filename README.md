@@ -27,3 +27,7 @@ Minimum arguments
 # cd /go/src/work/ops/cmd/sample
 # go run main.go --user-id=2 --status=1
 ```
+
+How to access phpMyAdmin
+1. Check login info of sample user `opsuser` in `docker-compose.yml`
+2. [http://localhost:13902/](http://localhost:13902/)

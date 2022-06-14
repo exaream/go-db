@@ -8,6 +8,8 @@ This is a tool made of Go for operating MySQL.
 $ docker network create go_ops_network
 $ docker-compose up -d
 $ docker container exec -it go_ops bash
+# cd /go/src/work/ops/
+# go mod tidy
 ```
 
 ### Usage

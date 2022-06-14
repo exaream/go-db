@@ -5,8 +5,7 @@ This is a tool made of Go for operating MySQL.
 
 ## Install
 ```shell
-$ docker network create go_ops_network
-$ docker-compose up -d
+$ docker-compose up --build -d
 $ docker container exec -it go_ops bash
 # cd /go/src/work/ops/
 # go mod tidy
@@ -17,6 +16,12 @@ Help
 ```shell
 # cd /go/src/work/ops/cmd/sample
 # go run main.go --help
+```
+
+Version
+```shell
+# cd /go/src/work/ops/cmd/sample
+# go run main.go --version
 ```
 
 Max arguments

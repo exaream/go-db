@@ -39,7 +39,7 @@ services:
       - container-link
 
 networks:
-  # Prevent generation "default" network automatically
+  # Prevent generating "default" network automatically
   default:
     external:
       name: bridge

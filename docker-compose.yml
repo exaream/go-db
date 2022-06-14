@@ -13,7 +13,7 @@ services:
       - "./mysql/storage:/var/lib/mysql"
       - "./mysql/setup/conf:/etc/mysql/conf.d"
       - "./mysql/setup/entrypoint:/docker-entrypoint-initdb.d"
-      #- "./mysql/setup/ddl:/docker-entrypoint-initdb.d/ddl"
+      - "./mysql/setup/ddl:/docker-entrypoint-initdb.d/ddl"
     environment:
       - MYSQL_USER=opsuser
       - MYSQL_PASSWORD=opspasswd

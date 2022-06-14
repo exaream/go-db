@@ -14,13 +14,12 @@ import (
 
 const layout = "2006-01-02 15:04:05" // Y-m-d H:i:s
 
-var timeout time.Duration = 30 * time.Second
-
 type Cond struct {
-	IniPath string
-	Section string
-	UserId  int
-	Status  int
+	iniPath string
+	section string
+	userId  int
+	status  int
+	timeout time.Duration
 }
 
 type user struct {
@@ -31,21 +30,22 @@ type user struct {
 	status    int
 }
 
-func NewCond(userId, status int, iniPath, section string) *Cond {
+func NewCond(userId, status int, iniPath, section string, timeout int) *Cond {
 	return &Cond{
-		IniPath: path.Clean(iniPath),
-		Section: section,
-		UserId:  userId,
-		Status:  status,
+		iniPath: path.Clean(iniPath),
+		section: section,
+		userId:  userId,
+		status:  status,
+		timeout: time.Duration(timeout) * time.Second,
 	}
 }
 
 func (c *Cond) Run() (rerr error) {
 	// Rollback if the time limit is exceeded.
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 
-	dbInfo, err := dbutil.ParseConf(c.IniPath, c.Section)
+	dbInfo, err := dbutil.ParseConf(c.iniPath, c.section)
 	if err != nil {
 		return err
 	}
@@ -80,13 +80,13 @@ func (c *Cond) Run() (rerr error) {
 	// TODO: Validate before update
 
 	// Update
-	_, err = tx.ExecContext(ctx, `UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?`, c.Status, c.UserId)
+	_, err = tx.ExecContext(ctx, `UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?`, c.status, c.userId)
 	if err != nil {
 		return dbutil.Rollback(tx, rerr, err)
 	}
 
 	//fmt.Println(result.RowsAffected())
-	fmt.Println("------------------")
+	fmt.Println("-------------------------------------------------")
 
 	// Before commit
 	if err := selectUsers(ctx, tx); err != nil {

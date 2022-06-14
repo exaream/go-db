@@ -11,7 +11,6 @@ import (
 	"github.com/alecthomas/kingpin"
 	_ "github.com/go-sql-driver/mysql"
 
-	"go.uber.org/multierr"
 	"ops/dbutil"
 )
 
@@ -124,7 +123,7 @@ func (c *Cond) Run() (rerr error) {
 	// Update
 	_, err = tx.ExecContext(ctx, `UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?`, c.Status, c.UserId)
 	if err != nil {
-		return rollback(tx, rerr, err)
+		return dbutil.Rollback(tx, rerr, err)
 	}
 
 	//fmt.Println(result.RowsAffected())
@@ -132,11 +131,11 @@ func (c *Cond) Run() (rerr error) {
 
 	// Before commit
 	if err := selectUsers(ctx, tx); err != nil {
-		return rollback(tx, rerr, err)
+		return dbutil.Rollback(tx, rerr, err)
 	}
 
 	if err := tx.Commit(); err != nil {
-		return rollback(tx, rerr, err)
+		return dbutil.Rollback(tx, rerr, err)
 	}
 
 	return nil
@@ -168,13 +167,4 @@ func selectUsers(ctx context.Context, tx *sql.Tx) (err error) {
 	}
 
 	return nil
-}
-
-// TODO Move to dbutil after review
-func rollback(tx *sql.Tx, rerr, err error) error {
-	rerr = multierr.Append(rerr, err)
-	if rollbackErr := tx.Rollback(); rollbackErr != nil {
-		return multierr.Append(rerr, rollbackErr)
-	}
-	return rerr
 }

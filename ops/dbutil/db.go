@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"go.uber.org/multierr"
 	"gopkg.in/ini.v1"
 )
 
@@ -58,4 +59,12 @@ func (c *Conf) Open() (*sql.DB, error) {
 	params := url.Values{"parseTime": {"true"}, "loc": {c.Tz}}
 
 	return sql.Open("mysql", srcName+"?"+params.Encode())
+}
+
+func Rollback(tx *sql.Tx, rerr, err error) error {
+	rerr = multierr.Append(rerr, err)
+	if rollbackErr := tx.Rollback(); rollbackErr != nil {
+		return multierr.Append(rerr, rollbackErr)
+	}
+	return rerr
 }

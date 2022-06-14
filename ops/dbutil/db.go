@@ -17,8 +17,8 @@ type Conf struct {
 	Username string
 	Password string
 	Protocol string
-	Port     int
 	Tz       string
+	Port     int
 }
 
 func ParseConf(iniPath, section string) (*Conf, error) {

@@ -4,86 +4,45 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"os"
 	"path"
 	"time"
 
-	"github.com/alecthomas/kingpin"
 	_ "github.com/go-sql-driver/mysql"
 
 	"ops/dbutil"
 )
 
-const (
-	timeout = 30                    // seconds
-	layout  = "2006-01-02 15:04:05" // Y-m-d H:i:s
-)
+const layout = "2006-01-02 15:04:05" // Y-m-d H:i:s
+
+var timeout time.Duration = 30 * time.Second
 
 type Cond struct {
 	IniPath string
 	Section string
-	Status  int
 	UserId  int
+	Status  int
 }
 
 type user struct {
 	createdAt *time.Time
 	updatedAt *time.Time
 	name      string
-	status    int
 	id        int
-}
-
-const version = "0.1.0"
-
-var (
-	// Command arguments
-	app     = kingpin.New("sample", "Sample command made of Go to operate MySQL.")
-	userId  = app.Flag("user-id", "Set user_id.").Int()
-	status  = app.Flag("status", "Set a status.").Int()
-	iniPath = app.Flag("ini-path", "Set an ini file path.").Default(".").String()
-	section = app.Flag("section", "Set a section name.").String()
-)
-
-func init() {
-	app.Version(version)
-
-	if _, err := app.Parse(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	status    int
 }
 
 func NewCond(userId, status int, iniPath, section string) *Cond {
 	return &Cond{
-		IniPath: iniPath,
+		IniPath: path.Clean(iniPath),
 		Section: section,
 		UserId:  userId,
 		Status:  status,
 	}
 }
 
-func IniPath() string {
-	return path.Clean(*iniPath)
-}
-
-func Section() string {
-	return *section
-}
-
-func UserId() int {
-	return *userId
-}
-
-func Status() int {
-	return *status
-}
-
-// TODO: Move to the internal directory. ===================================
-// TODO: Get command's arguments.
 func (c *Cond) Run() (rerr error) {
 	// Rollback if the time limit is exceeded.
-	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	dbInfo, err := dbutil.ParseConf(c.IniPath, c.Section)

@@ -16,9 +16,9 @@ import (
 // Cond has the fields needed to operate a DB.
 type Cond struct {
 	Writer  io.Writer
-	timeout time.Duration
 	ini     ini
 	stmt    stmt
+	timeout time.Duration
 	where   where
 	set     set
 }
@@ -27,7 +27,7 @@ type ini struct {
 	section string
 }
 type stmt struct {
-	query   string // Do not use the word "select" because it is a reserved word in Go.
+	query   string // Do NOT use the word "select" because it is a reserved word in Go.
 	command string
 }
 type set struct {
@@ -54,7 +54,6 @@ func NewCond(iniPath, section string, timeout, userId, status int) *Cond {
 			path:    iniPath,
 			section: section,
 		},
-
 		// Please change the following when creating your own package.
 		stmt: stmt{
 			query:   `SELECT id, name, status, created_at, updated_at FROM users;`,
@@ -71,6 +70,7 @@ func (c *Cond) Run() (rerr error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 
+	// Get DB handle.
 	db, err := dbx.OpenByIni(c.ini.path, c.ini.section)
 	if err != nil {
 		return err
@@ -103,7 +103,6 @@ func (c *Cond) Run() (rerr error) {
 
 	// Please add validation here when creating your own package.
 
-	// Update
 	// Please change the following when creating your own package.
 	// TODO: Confirm how to abstruct and inject the following arguments.
 	_, err = tx.ExecContext(ctx, c.stmt.command, c.set.status, c.where.userId)

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// TODO: Confirm how to call a helper func in TestMain which does not have testing.T.
+// TODO: Confirm how to call a helper func in TestMain which does NOT have testing.T.
 func TestMain(m *testing.M) {
 	if err := initTable(testIniPath, testSection); err != nil {
 		fmt.Fprintln(os.Stderr, err)

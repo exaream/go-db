@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"ops/dbutil"
+	"ops/dbx"
 )
 
 const (
@@ -38,7 +38,7 @@ var testUsers = []user{
 func initTable(iniPath, section string) (rerr error) {
 	ctx := context.Context(context.Background())
 
-	db, err := dbutil.OpenByConf(iniPath, section)
+	db, err := dbx.OpenByIni(iniPath, section)
 	if err != nil {
 		return err
 	}
@@ -59,11 +59,11 @@ func initTable(iniPath, section string) (rerr error) {
 	}
 
 	if _, err := tx.ExecContext(ctx, dropTblStmt()); err != nil {
-		return dbutil.Rollback(tx, rerr, err)
+		return dbx.Rollback(tx, rerr, err)
 	}
 
 	if _, err := tx.ExecContext(ctx, createTblStmt()); err != nil {
-		return dbutil.Rollback(tx, rerr, err)
+		return dbx.Rollback(tx, rerr, err)
 	}
 
 	numFields := reflect.TypeOf(user{}).NumField() // the number of fields of struct
@@ -84,7 +84,7 @@ func initTable(iniPath, section string) (rerr error) {
 	query := fmt.Sprintf(insertTblStmt(), strings.Join(placeHolders, ","))
 
 	if _, err := tx.ExecContext(ctx, query, values...); err != nil {
-		return dbutil.Rollback(tx, rerr, err)
+		return dbx.Rollback(tx, rerr, err)
 	}
 
 	return nil

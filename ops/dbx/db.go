@@ -1,6 +1,7 @@
-package dbutil
+package dbx
 
 import (
+	"context"
 	"database/sql"
 	"encoding/base64"
 	"errors"
@@ -24,8 +25,8 @@ type Conf struct {
 	Port     int
 }
 
-// OpenByConf returns a DB handle by a config file's path.
-func OpenByConf(iniPath, section string) (*sql.DB, error) {
+// OpenByIni returns a DB handle by an ini file.
+func OpenByIni(iniPath, section string) (*sql.DB, error) {
 	conf, err := ParseConf(iniPath, section)
 	if err != nil {
 		return nil, err
@@ -79,6 +80,22 @@ func Open(c *Conf) (*sql.DB, error) {
 	params := url.Values{"parseTime": {"true"}, "loc": {c.Tz}}
 
 	return sql.Open("mysql", srcName+"?"+params.Encode())
+}
+
+func QueryTxWithContext(ctx context.Context, tx *sql.Tx, stmt string, fn func(context.Context, *sql.Rows) error) error {
+	rows, err := tx.QueryContext(ctx, stmt)
+	if err != nil {
+		return err
+	}
+	return fn(ctx, rows)
+}
+
+func QueryWithContext(ctx context.Context, db *sql.DB, stmt string, fn func(context.Context, *sql.Rows) error) error {
+	rows, err := db.QueryContext(ctx, stmt)
+	if err != nil {
+		return err
+	}
+	return fn(ctx, rows)
 }
 
 // Rollback rollbacks using transaction.

@@ -10,7 +10,8 @@ import (
 	"strconv"
 
 	"go.uber.org/multierr"
-	"gopkg.in/ini.v1"
+
+	"ops/inix"
 )
 
 const (
@@ -45,12 +46,10 @@ func OpenByIni(iniPath, section string) (*sql.DB, error) {
 
 // ParseConf returns DB's config info.
 func ParseConf(iniPath, section string) (*Conf, error) {
-	iniFile, err := ini.Load(iniPath)
+	sec, err := inix.ParseIni(iniPath, section)
 	if err != nil {
 		return nil, errors.New("faild to load a DSN file")
 	}
-
-	sec := iniFile.Section(section)
 
 	encodedPwd := sec.Key("password").String()
 	decodedPwd, err := base64.StdEncoding.DecodeString(encodedPwd)

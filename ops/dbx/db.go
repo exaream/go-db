@@ -13,7 +13,10 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-const YmdHis = "2006-01-02 15:04:05" // layout of "Y-m-d H:i:s"
+const (
+	LF     = "\n"
+	YmdHis = "2006-01-02 15:04:05" // layout of "Y-m-d H:i:s"
+)
 
 type Conf struct {
 	Host     string

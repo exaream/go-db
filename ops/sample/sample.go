@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"path"
+	"io"
+	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -12,18 +13,28 @@ import (
 	"ops/dbx"
 )
 
-const (
-	selectStmt = `SELECT id, name, status, created_at, updated_at FROM users;`
-	updateStmt = `UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?`
-)
-
 // Cond has the fields needed to operate a DB.
 type Cond struct {
+	Writer  io.Writer
 	timeout time.Duration
-	iniPath string
+	ini     ini
+	stmt    stmt
+	where   where
+	set     set
+}
+type ini struct {
+	path    string
 	section string
-	userId  int
-	status  int
+}
+type stmt struct {
+	query   string // Do not use the word "select" because it is a reserved word in Go.
+	command string
+}
+type set struct {
+	status int
+}
+type where struct {
+	userId int
 }
 
 type user struct {
@@ -35,13 +46,22 @@ type user struct {
 }
 
 // NewCond returns the info needed to operate a DB.
-func NewCond(userId, status int, iniPath, section string, timeout int) *Cond {
+func NewCond(iniPath, section string, timeout, userId, status int) *Cond {
 	return &Cond{
+		Writer:  os.Stdout,
 		timeout: time.Duration(timeout) * time.Second,
-		iniPath: path.Clean(iniPath),
-		section: section,
-		userId:  userId,
-		status:  status,
+		ini: ini{
+			path:    iniPath,
+			section: section,
+		},
+
+		// Please change the following when creating your own package.
+		stmt: stmt{
+			query:   `SELECT id, name, status, created_at, updated_at FROM users;`,
+			command: `UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?;`,
+		},
+		set:   set{status: status},
+		where: where{userId: userId},
 	}
 }
 
@@ -51,7 +71,7 @@ func (c *Cond) Run() (rerr error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 
-	db, err := dbx.OpenByIni(c.iniPath, c.section)
+	db, err := dbx.OpenByIni(c.ini.path, c.ini.section)
 	if err != nil {
 		return err
 	}
@@ -67,10 +87,11 @@ func (c *Cond) Run() (rerr error) {
 		return err
 	}
 
-	fmt.Println("-------------------------------------------------")
-	fmt.Println("Before operating")
+	if err := c.log(dbx.LF + "Before operating"); err != nil {
+		return err
+	}
 
-	if err := dbx.QueryWithContext(ctx, db, selectStmt, scanRows); err != nil {
+	if err := dbx.QueryWithContext(ctx, db, c.stmt.query, scanRows); err != nil {
 		return err
 	}
 
@@ -80,19 +101,22 @@ func (c *Cond) Run() (rerr error) {
 		return err
 	}
 
-	// TODO: Validate before update
+	// Please add validation here when creating your own package.
 
 	// Update
-	_, err = tx.ExecContext(ctx, updateStmt, c.status, c.userId)
+	// Please change the following when creating your own package.
+	// TODO: Confirm how to abstruct and inject the following arguments.
+	_, err = tx.ExecContext(ctx, c.stmt.command, c.set.status, c.where.userId)
 	if err != nil {
 		return dbx.Rollback(tx, rerr, err)
 	}
 
-	//fmt.Println(result.RowsAffected())
-	fmt.Println("-------------------------------------------------")
-	fmt.Println("Before commit")
+	// fmt.Println(result.RowsAffected())
+	if err := c.log(dbx.LF + "Before commit"); err != nil {
+		return err
+	}
 
-	if err := dbx.QueryTxWithContext(ctx, tx, selectStmt, scanRows); err != nil {
+	if err := dbx.QueryTxWithContext(ctx, tx, c.stmt.query, scanRows); err != nil {
 		return dbx.Rollback(tx, rerr, err)
 	}
 
@@ -100,10 +124,15 @@ func (c *Cond) Run() (rerr error) {
 		return dbx.Rollback(tx, rerr, err)
 	}
 
-	fmt.Println("-------------------------------------------------")
-	fmt.Println("After commit")
+	if err := c.log(dbx.LF + "After operating"); err != nil {
+		return err
+	}
 
-	if err := dbx.QueryWithContext(ctx, db, selectStmt, scanRows); err != nil {
+	if err := dbx.QueryWithContext(ctx, db, c.stmt.query, scanRows); err != nil {
+		return err
+	}
+
+	if err := c.log(""); err != nil {
 		return err
 	}
 
@@ -121,9 +150,10 @@ func scanRows(ctx context.Context, rows *sql.Rows) (err error) {
 		}
 	}()
 
+	// Please change the following when creating your own package.
 	for rows.Next() {
 		var u user
-		// TODO: 動的に Scan の引数にセットする方法があるか確認
+		// TODO: Confirm how to abstruct and inject the following arguments.
 		err := rows.Scan(&u.id, &u.name, &u.status, &u.createdAt, &u.updatedAt)
 		if err != nil {
 			return err
@@ -132,4 +162,9 @@ func scanRows(ctx context.Context, rows *sql.Rows) (err error) {
 	}
 
 	return nil
+}
+
+func (c *Cond) log(msg string) error {
+	_, err := fmt.Fprintln(c.Writer, msg)
+	return err
 }

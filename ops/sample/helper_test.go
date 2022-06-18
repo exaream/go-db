@@ -15,8 +15,9 @@ const (
 	testTimeout = 30
 )
 
-// As types and order of of firlds are different from `user` in sample package,
+// As types and order of of firlds are different from "user" in sample package,
 // I wrote the following struct in sample_test package separately.
+// Notice: Do NOT apply fieldalignment to the following "user".
 type user struct {
 	id        int
 	name      string

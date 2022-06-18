@@ -12,8 +12,12 @@ import (
 	"ops/dbutil"
 )
 
-const layout = "2006-01-02 15:04:05" // Y-m-d H:i:s
+const (
+	selectStmt = `SELECT id, name, status, created_at, updated_at FROM users;`
+	updateStmt = `UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?`
+)
 
+// Cond has the fields needed to operate DB.
 type Cond struct {
 	iniPath string
 	section string
@@ -30,6 +34,7 @@ type user struct {
 	status    int
 }
 
+// NewCond returns the info needed to operate DB.
 func NewCond(userId, status int, iniPath, section string, timeout int) *Cond {
 	return &Cond{
 		iniPath: path.Clean(iniPath),
@@ -40,17 +45,13 @@ func NewCond(userId, status int, iniPath, section string, timeout int) *Cond {
 	}
 }
 
+// Run does a DB operation.
 func (c *Cond) Run() (rerr error) {
 	// Rollback if the time limit is exceeded.
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 
-	dbInfo, err := dbutil.ParseConf(c.iniPath, c.section)
-	if err != nil {
-		return err
-	}
-
-	db, err := dbInfo.Open()
+	db, err := dbutil.OpenByConf(c.iniPath, c.section)
 	if err != nil {
 		return err
 	}
@@ -66,30 +67,32 @@ func (c *Cond) Run() (rerr error) {
 		return err
 	}
 
+	fmt.Println("-------------------------------------------------")
+	fmt.Println("Before operating")
+
+	if err := query(db); err != nil {
+		return err
+	}
+
 	// Begin transaction.
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	// Check DB values before execution.
-	if err := selectUsers(ctx, tx); err != nil {
-		return err
-	}
-
 	// TODO: Validate before update
 
 	// Update
-	_, err = tx.ExecContext(ctx, `UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?`, c.status, c.userId)
+	_, err = tx.ExecContext(ctx, updateStmt, c.status, c.userId)
 	if err != nil {
 		return dbutil.Rollback(tx, rerr, err)
 	}
 
 	//fmt.Println(result.RowsAffected())
 	fmt.Println("-------------------------------------------------")
+	fmt.Println("Before commit")
 
-	// Before commit
-	if err := selectUsers(ctx, tx); err != nil {
+	if err := queryWithContext(ctx, tx); err != nil {
 		return dbutil.Rollback(tx, rerr, err)
 	}
 
@@ -97,11 +100,18 @@ func (c *Cond) Run() (rerr error) {
 		return dbutil.Rollback(tx, rerr, err)
 	}
 
+	fmt.Println("-------------------------------------------------")
+	fmt.Println("After commit")
+
+	if err := query(db); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func selectUsers(ctx context.Context, tx *sql.Tx) (err error) {
-	rows, err := tx.QueryContext(ctx, `SELECT id, name, status, created_at, updated_at FROM users;`)
+func queryWithContext(ctx context.Context, tx *sql.Tx) (err error) {
+	rows, err := tx.QueryContext(ctx, selectStmt)
 	if err != nil {
 		return err
 	}
@@ -122,7 +132,36 @@ func selectUsers(ctx context.Context, tx *sql.Tx) (err error) {
 		if err != nil {
 			return err
 		}
-		fmt.Println(u.id, u.name, u.status, u.createdAt.Format(layout), u.updatedAt.Format(layout))
+		fmt.Println(u.id, u.name, u.status, u.createdAt.Format(dbutil.YmdHis), u.updatedAt.Format(dbutil.YmdHis))
+	}
+
+	return nil
+}
+
+// Notice: Do not use `select` as a function name because it is a reserved name in Go.
+func query(db *sql.DB) (err error) {
+	rows, err := db.Query(selectStmt)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if rerr := rows.Close(); err == nil && rerr != nil {
+			err = rerr
+		}
+		// Check errors other than EOL error
+		if rerr := rows.Err(); err == nil && rerr != nil {
+			err = rerr
+		}
+	}()
+
+	for rows.Next() {
+		var u user
+		err := rows.Scan(&u.id, &u.name, &u.status, &u.createdAt, &u.updatedAt)
+		if err != nil {
+			return err
+		}
+		fmt.Println(u.id, u.name, u.status, u.createdAt.Format(dbutil.YmdHis), u.updatedAt.Format(dbutil.YmdHis))
 	}
 
 	return nil

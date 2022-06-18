@@ -83,6 +83,7 @@ func Open(c *Conf) (*sql.DB, error) {
 
 // Rollback rollbacks using transaction.
 // It can return multiple errors.
+// TODO: How do I test this function?
 func Rollback(tx *sql.Tx, rerr, err error) error {
 	rerr = multierr.Append(rerr, err)
 	if rollbackErr := tx.Rollback(); rollbackErr != nil {

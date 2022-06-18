@@ -6,7 +6,8 @@ import (
 
 	"github.com/alecthomas/kingpin"
 	"go.uber.org/multierr"
-	s "ops/sample"
+
+	"ops/sample"
 )
 
 const (
@@ -42,7 +43,7 @@ func init() {
 }
 
 func main() {
-	c := s.NewCond(*userId, *status, *iniPath, *section, *timeout)
+	c := sample.NewCond(*iniPath, *section, *timeout, *userId, *status)
 
 	if errs := c.Run(); errs != nil {
 		for _, err := range multierr.Errors(errs) {

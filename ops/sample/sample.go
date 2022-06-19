@@ -138,6 +138,10 @@ func (c *Cond) Run() (rerr error) {
 	return nil
 }
 
+// TODO: Generics で型を指定し ([]*user, error) を返却するためには
+// インスタンス化してからしか dbx.QueryWithContext 等の引数として
+// scanRows を渡せないため、対応方法をレビュー時に確認
+// 今回は *sql.Rows の値を []*user 型で返却できてからテストを書くこととする
 func scanRows(ctx context.Context, rows *sql.Rows) (err error) {
 	defer func() {
 		if rerr := rows.Close(); err == nil && rerr != nil {

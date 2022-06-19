@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/exaream/go-rdb/dbx"
+	"github.com/exaream/go-db/dbx"
 )
 
 // Cond has the fields needed to operate a DB.

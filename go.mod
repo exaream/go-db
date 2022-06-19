@@ -1,4 +1,4 @@
-module github.com/exaream/go-rdb
+module github.com/exaream/go-db
 
 go 1.18
 

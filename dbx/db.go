@@ -11,7 +11,7 @@ import (
 
 	"go.uber.org/multierr"
 
-	"github.com/exaream/go-rdb/inix"
+	"github.com/exaream/go-db/inix"
 )
 
 const (

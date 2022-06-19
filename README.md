@@ -1,4 +1,4 @@
-# Go RDB
+# Go DB
 
 ## Overview
 This is a tool made of Go for operating MySQL.
@@ -6,7 +6,7 @@ This is a tool made of Go for operating MySQL.
 ## Install
 ```shell
 $ docker-compose up --build -d
-$ docker container exec -it go_rdb_app bash
+$ docker container exec -it go_db_app bash
 ```
 
 ### Usage

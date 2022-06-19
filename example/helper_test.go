@@ -96,7 +96,7 @@ func dropTblStmt() string {
 }
 
 func createTblStmt() string {
-	// TODO: Confirm how to escape back slashes in bash slashes.
+	// TODO: How to escape back quotes in bash quotes.
 	return `CREATE TABLE example_db.users (
 		id int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 		name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,

@@ -104,7 +104,7 @@ func QueryWithContext(ctx context.Context, db *sql.DB, stmt string, fn func(cont
 
 // Rollback rollbacks using transaction.
 // It can return multiple errors.
-// TODO: How do I test this function?
+// TODO: How to do test this function
 func Rollback(tx *sql.Tx, rerr, err error) error {
 	rerr = multierr.Append(rerr, err)
 	if rollbackErr := tx.Rollback(); rollbackErr != nil {

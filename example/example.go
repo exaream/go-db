@@ -65,6 +65,7 @@ func NewCond(iniPath, section string, timeout, userId, status int) *Cond {
 }
 
 // Run does a DB operation.
+//TODO: How to shorten this function
 func (c *Cond) Run() (rerr error) {
 	// Rollback if the time limit is exceeded.
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
@@ -106,7 +107,7 @@ func (c *Cond) Run() (rerr error) {
 	// Please add validation here when creating your own package.
 
 	// Please change the following when creating your own package.
-	// TODO: Confirm how to abstruct and inject the following arguments.
+	// TODO: How to abstruct and inject the following arguments.
 	_, err = tx.ExecContext(ctx, c.stmt.command, c.set.status, c.where.userId)
 	if err != nil {
 		return dbx.Rollback(tx, rerr, err)
@@ -144,7 +145,7 @@ func (c *Cond) Run() (rerr error) {
 	return nil
 }
 
-// TODO: records に Generics で user型のスライスを定義できないかレビュー時に確認
+// TODO: How to apply `user` type to `records` using generics.
 func scanRows(ctx context.Context, rows *sql.Rows) (_ dbx.Records, err error) {
 	defer func() {
 		if rerr := rows.Close(); err == nil && rerr != nil {
@@ -161,7 +162,7 @@ func scanRows(ctx context.Context, rows *sql.Rows) (_ dbx.Records, err error) {
 	// Please change the following when creating your own package.
 	for rows.Next() {
 		var u user
-		// TODO: Confirm how to abstruct and inject the following arguments.
+		// TODO: How to abstruct and inject the following arguments.
 		err := rows.Scan(&u.id, &u.name, &u.status, &u.createdAt, &u.updatedAt)
 		if err != nil {
 			return nil, err

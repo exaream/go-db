@@ -29,9 +29,11 @@ type Conf struct {
 	Port     int
 }
 
+type Records map[int]map[string]any
+
 // OpenByIni returns a DB handle by an ini file.
 func OpenByIni(iniPath, section string) (*sql.DB, error) {
-	conf, err := ParseConf(iniPath, section)
+	conf, err := ParseIni(iniPath, section)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +46,8 @@ func OpenByIni(iniPath, section string) (*sql.DB, error) {
 	return db, nil
 }
 
-// ParseConf returns DB's config info.
-func ParseConf(iniPath, section string) (*Conf, error) {
+// ParseIni returns DB's config info.
+func ParseIni(iniPath, section string) (*Conf, error) {
 	sec, err := inix.ParseIni(iniPath, section)
 	if err != nil {
 		return nil, errors.New("faild to load a DSN file")
@@ -84,18 +86,18 @@ func Open(c *Conf) (*sql.DB, error) {
 	return sql.Open("mysql", srcName+"?"+params.Encode())
 }
 
-func QueryTxWithContext(ctx context.Context, tx *sql.Tx, stmt string, fn func(context.Context, *sql.Rows) error) error {
+func QueryTxWithContext(ctx context.Context, tx *sql.Tx, stmt string, fn func(context.Context, *sql.Rows) (Records, error)) (Records, error) {
 	rows, err := tx.QueryContext(ctx, stmt)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	return fn(ctx, rows)
 }
 
-func QueryWithContext(ctx context.Context, db *sql.DB, stmt string, fn func(context.Context, *sql.Rows) error) error {
+func QueryWithContext(ctx context.Context, db *sql.DB, stmt string, fn func(context.Context, *sql.Rows) (Records, error)) (Records, error) {
 	rows, err := db.QueryContext(ctx, stmt)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	return fn(ctx, rows)
 }

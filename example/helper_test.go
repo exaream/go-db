@@ -29,7 +29,7 @@ type user struct {
 
 var testUsers = []user{
 	{1, "Alice", "example1@example.com", 0, "2022-01-01 00:00:00", "2022-01-01 00:00:00"},
-	{2, "Bob", "example2@example.com", 0, "2022-01-01 00:00:00", "2022-01-01 00:00:00"},
+	{2, "Billy", "example2@example.com", 0, "2022-01-01 00:00:00", "2022-01-01 00:00:00"},
 	{3, "Chris", "example3@example.com", 0, "2022-01-01 00:00:00", "2022-01-01 00:00:00"},
 }
 

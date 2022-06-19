@@ -19,4 +19,4 @@ ADD . /go/src/work
 RUN go install github.com/kisielk/errcheck@latest \
     go install golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment@latest \
     curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
-RUN cd /go/src/work/ops && go mod tidy
+RUN cd /go/src/work && go mod tidy

@@ -5,21 +5,20 @@ import (
 	"os"
 
 	"github.com/alecthomas/kingpin"
+	"github.com/exaream/go-rdb/example"
 	"go.uber.org/multierr"
-
-	"ops/sample"
 )
 
 const (
 	version        = "0.1.0"
-	defaultIniPath = "credentials/foo.ini"
-	defaultSection = "sample"
+	defaultIniPath = "example.ini"
+	defaultSection = "example"
 	defaultTimeout = 30
 )
 
 // Arguments
 var (
-	app     = kingpin.New("sample", "Sample command made of Go to operate MySQL.")
+	app     = kingpin.New("example", "An example command made of Go to operate MySQL.")
 	userId  = app.Flag("user-id", "Set user_id.").Int()
 	status  = app.Flag("status", "Set a status.").Int()
 	iniPath = app.Flag("ini-path", "Set an ini file path.").Default(defaultIniPath).String()
@@ -43,7 +42,7 @@ func init() {
 }
 
 func main() {
-	c := sample.NewCond(*iniPath, *section, *timeout, *userId, *status)
+	c := example.NewCond(*iniPath, *section, *timeout, *userId, *status)
 
 	if errs := c.Run(); errs != nil {
 		for _, err := range multierr.Errors(errs) {

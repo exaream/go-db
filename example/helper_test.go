@@ -34,7 +34,7 @@ var testUsers = []user{
 }
 
 // We can use the following SQL to initialize DB.
-// /go/src/work/local/mysql/setup/ddl/example_db.sql
+// /go/src/work/_local/mysql/setup/ddl/example_db.sql
 // But I wrote the process using Go for learning the language.
 func initTable(iniPath, section string) (rerr error) {
 	ctx := context.Context(context.Background())

@@ -12,10 +12,10 @@ services:
     container_name: go_rdb_db
     image: mysql:5.7.25
     volumes:
-      - "./local/mysql/storage:/var/lib/mysql"
-      - "./local/mysql/setup/conf:/etc/mysql/conf.d"
-      - "./local/mysql/setup/entrypoint:/docker-entrypoint-initdb.d"
-      - "./local/mysql/setup/ddl:/docker-entrypoint-initdb.d/ddl"
+      - "./_local/mysql/storage:/var/lib/mysql"
+      - "./_local/mysql/setup/conf:/etc/mysql/conf.d"
+      - "./_local/mysql/setup/entrypoint:/docker-entrypoint-initdb.d"
+      - "./_local/mysql/setup/ddl:/docker-entrypoint-initdb.d/ddl"
     # The following is the DB connection info for a local env.
     # Never use the following in your production env.
     environment:
@@ -29,7 +29,7 @@ services:
     container_name: go_rdb_phpmyadmin
     image: phpmyadmin/phpmyadmin
     volumes:
-      - "./local/phpmyadmin/setup/conf/upload.ini:/usr/local/etc/php/conf.d/upload.ini"
+      - "./_local/phpmyadmin/setup/conf/upload.ini:/usr/local/etc/php/conf.d/upload.ini"
     environment:
       - PMA_ARBITRARY=0
       - PMA_HOSTS=go_rdb_db

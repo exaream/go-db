@@ -35,7 +35,7 @@ var testUsers = []user{
 
 // We can use the following SQL to initialize DB.
 // /go/src/work/_local/mysql/setup/ddl/example_db.sql
-// But I wrote the process using Go for learning the language.
+// But I wrote bulk insert for as a sample.
 func initTable(iniPath, section string) (rerr error) {
 	ctx := context.Context(context.Background())
 

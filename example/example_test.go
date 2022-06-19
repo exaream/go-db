@@ -1,4 +1,4 @@
-package sample_test
+package example_test
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ func TestRun(t *testing.T) {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			c := sample.NewCond(tt.id, tt.status, testIniPath, testSection, testTimeout)
+			c := example.NewCond(tt.id, tt.status, testIniPath, testSection, testTimeout)
 			if err := c.Run(); err != nil {
 				t.Error(err)
 			}

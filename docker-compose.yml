@@ -1,38 +1,40 @@
 version: "3"
 services:
-  go_ops:
-    container_name: go_ops
+  go_rdb_app:
+    container_name: go_rdb_app
     build: .
     tty: true
     volumes:
       - .:/go/src/work
     networks:
       - container-link
-  go_ops_db:
-    container_name: go_ops_db
+  go_rdb_db:
+    container_name: go_rdb_db
     image: mysql:5.7.25
     volumes:
-      - "./mysql/storage:/var/lib/mysql"
-      - "./mysql/setup/conf:/etc/mysql/conf.d"
-      - "./mysql/setup/entrypoint:/docker-entrypoint-initdb.d"
-      - "./mysql/setup/ddl:/docker-entrypoint-initdb.d/ddl"
+      - "./local/mysql/storage:/var/lib/mysql"
+      - "./local/mysql/setup/conf:/etc/mysql/conf.d"
+      - "./local/mysql/setup/entrypoint:/docker-entrypoint-initdb.d"
+      - "./local/mysql/setup/ddl:/docker-entrypoint-initdb.d/ddl"
+    # The following is the DB connection info for a local env.
+    # Never use the following in your production env.
     environment:
-      - MYSQL_USER=opsuser
-      - MYSQL_PASSWORD=opspasswd
+      - MYSQL_USER=exampleuser
+      - MYSQL_PASSWORD=examplepasswd
       - MYSQL_ROOT_PASSWORD=rootpasswd
       - TZ=Asia/Tokyo
     networks:
       - container-link
-  go_ops_phpmyadmin:
-    container_name: go_ops_phpmyadmin
+  go_rdb_phpmyadmin:
+    container_name: go_rdb_phpmyadmin
     image: phpmyadmin/phpmyadmin
     volumes:
-      - "./phpmyadmin/setup/conf/upload.ini:/usr/local/etc/php/conf.d/upload.ini"
+      - "./local/phpmyadmin/setup/conf/upload.ini:/usr/local/etc/php/conf.d/upload.ini"
     environment:
       - PMA_ARBITRARY=0
-      - PMA_HOSTS=go_ops_db
+      - PMA_HOSTS=go_rdb_db
     links:
-      - go_ops_db
+      - go_rdb_db
     ports:
       - 13902:80
     networks:
@@ -45,4 +47,4 @@ networks:
       name: bridge
   # Network segment of inter-container communication
   container-link:
-    name: go_ops_network
+    name: go_rdb_network

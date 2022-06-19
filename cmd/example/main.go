@@ -5,14 +5,13 @@ import (
 	"os"
 
 	"github.com/alecthomas/kingpin"
+	"github.com/exaream/go-rdb/example"
 	"go.uber.org/multierr"
-
-	"ops/sample"
 )
 
 const (
 	version        = "0.1.0"
-	defaultIniPath = "credentials/foo.ini"
+	defaultIniPath = "credentials/example.ini"
 	defaultSection = "sample"
 	defaultTimeout = 30
 )
@@ -43,7 +42,7 @@ func init() {
 }
 
 func main() {
-	c := sample.NewCond(*iniPath, *section, *timeout, *userId, *status)
+	c := example.NewCond(*iniPath, *section, *timeout, *userId, *status)
 
 	if errs := c.Run(); errs != nil {
 		for _, err := range multierr.Errors(errs) {

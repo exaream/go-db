@@ -91,9 +91,11 @@ func (c *Cond) Run() (rerr error) {
 		return err
 	}
 
-	if err := dbx.QueryWithContext(ctx, db, c.stmt.query, scanRows); err != nil {
+	records, err := dbx.QueryWithContext(ctx, db, c.stmt.query, scanRows)
+	if err != nil {
 		return err
 	}
+	fmt.Println(records)
 
 	// Begin transaction.
 	tx, err := db.BeginTx(ctx, nil)
@@ -115,9 +117,11 @@ func (c *Cond) Run() (rerr error) {
 		return err
 	}
 
-	if err := dbx.QueryTxWithContext(ctx, tx, c.stmt.query, scanRows); err != nil {
-		return dbx.Rollback(tx, rerr, err)
+	records, err = dbx.QueryTxWithContext(ctx, tx, c.stmt.query, scanRows)
+	if err != nil {
+		return err
 	}
+	fmt.Println(records)
 
 	if err := tx.Commit(); err != nil {
 		return dbx.Rollback(tx, rerr, err)
@@ -127,9 +131,11 @@ func (c *Cond) Run() (rerr error) {
 		return err
 	}
 
-	if err := dbx.QueryWithContext(ctx, db, c.stmt.query, scanRows); err != nil {
+	records, err = dbx.QueryWithContext(ctx, db, c.stmt.query, scanRows)
+	if err != nil {
 		return err
 	}
+	fmt.Println(records)
 
 	if err := c.log(""); err != nil {
 		return err
@@ -138,7 +144,8 @@ func (c *Cond) Run() (rerr error) {
 	return nil
 }
 
-func scanRows(ctx context.Context, rows *sql.Rows) (err error) {
+// TODO: records に Generics で user型のスライスを定義できないかレビュー時に確認
+func scanRows(ctx context.Context, rows *sql.Rows) (_ dbx.Records, err error) {
 	defer func() {
 		if rerr := rows.Close(); err == nil && rerr != nil {
 			err = rerr
@@ -149,18 +156,29 @@ func scanRows(ctx context.Context, rows *sql.Rows) (err error) {
 		}
 	}()
 
+	records := make(dbx.Records) // 並行時の競合を避けるため初期化
+
 	// Please change the following when creating your own package.
 	for rows.Next() {
 		var u user
 		// TODO: Confirm how to abstruct and inject the following arguments.
 		err := rows.Scan(&u.id, &u.name, &u.status, &u.createdAt, &u.updatedAt)
 		if err != nil {
-			return err
+			return nil, err
 		}
+
+		records[u.id] = map[string]any{
+			"id":        u.id,
+			"name":      u.name,
+			"status":    u.status,
+			"createdAt": u.createdAt.Format(dbx.YmdHis),
+			"updatedAt": u.updatedAt.Format(dbx.YmdHis),
+		}
+
 		fmt.Println(u.id, u.name, u.status, u.createdAt.Format(dbx.YmdHis), u.updatedAt.Format(dbx.YmdHis))
 	}
 
-	return nil
+	return records, nil
 }
 
 func (c *Cond) log(msg string) error {

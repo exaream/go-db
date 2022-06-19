@@ -1,15 +1,15 @@
 version: "3"
 services:
-  go_rdb_app:
-    container_name: go_rdb_app
+  go_db_app:
+    container_name: go_db_app
     build: .
     tty: true
     volumes:
       - .:/go/src/work
     networks:
       - container-link
-  go_rdb_db:
-    container_name: go_rdb_db
+  go_db_mysql:
+    container_name: go_db_mysql
     image: mysql:5.7.25
     volumes:
       - "./_local/mysql/storage:/var/lib/mysql"
@@ -25,16 +25,16 @@ services:
       - TZ=Asia/Tokyo
     networks:
       - container-link
-  go_rdb_phpmyadmin:
-    container_name: go_rdb_phpmyadmin
+  go_db_phpmyadmin:
+    container_name: go_db_phpmyadmin
     image: phpmyadmin/phpmyadmin
     volumes:
       - "./_local/phpmyadmin/setup/conf/upload.ini:/usr/local/etc/php/conf.d/upload.ini"
     environment:
       - PMA_ARBITRARY=0
-      - PMA_HOSTS=go_rdb_db
+      - PMA_HOSTS=go_db_mysql
     links:
-      - go_rdb_db
+      - go_db_mysql
     ports:
       - 13902:80
     networks:
@@ -47,4 +47,4 @@ networks:
       name: bridge
   # Network segment of inter-container communication
   container-link:
-    name: go_rdb_network
+    name: go_db_network

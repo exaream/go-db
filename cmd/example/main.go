@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/alecthomas/kingpin"
-	"github.com/exaream/go-rdb/example"
+	"github.com/exaream/go-db/example"
 	"go.uber.org/multierr"
 )
 

@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/exaream/go-rdb/dbx"
+	"github.com/exaream/go-db/dbx"
 )
 
 const (

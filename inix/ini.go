@@ -8,9 +8,9 @@ import (
 
 // ParseIni returns info of a section of an ini file.
 func ParseIni(iniPath, section string) (*ini.Section, error) {
-	iniFile, err := ini.Load(iniPath)
+	f, err := ini.Load(iniPath)
 	if err != nil {
 		return nil, errors.New("faild to load an ini file")
 	}
-	return iniFile.Section(section), nil
+	return f.Section(section), nil
 }

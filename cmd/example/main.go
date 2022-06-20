@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alecthomas/kingpin"
 	"github.com/exaream/go-db/example"
 	"go.uber.org/multierr"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 const (

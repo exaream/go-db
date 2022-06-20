@@ -3,9 +3,9 @@ module github.com/exaream/go-db
 go 1.18
 
 require (
-	github.com/alecthomas/kingpin v2.2.6+incompatible
 	github.com/go-sql-driver/mysql v1.6.0
 	go.uber.org/multierr v1.8.0
+	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/ini.v1 v1.66.6
 )
 

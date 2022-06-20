@@ -9,9 +9,59 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"go.uber.org/multierr"
 
 	"github.com/exaream/go-db/dbx"
+	"github.com/go-logr/logr"
 )
+
+type Executor[S, R, T any] struct {
+	DB     *sql.DB
+	logger *logr.Logger
+}
+
+type Action[S, R, T any] struct {
+	Setup    func(ctx context.Context, tx *sql.Tx) (S, error)
+	Run      func(ctx context.Context, tx *sql.Tx, s S) (R, error)
+	Teardown func(ctx context.Context, db *sql.DB, r R) (T, error)
+}
+
+// NOTE: We wrap `do()` with `Do()` to avoid named arguments appering in the document of pkg.go.dev.
+func (e *Executor[S, R, T]) Do(ctx context.Context, act *Action[S, R, T]) (T, error) {
+	return e.do(ctx, act)
+}
+
+// NOTE: We use `zeroT` for returning the zero value of `T` type when an error occurs.
+func (e *Executor[S, R, T]) do(ctx context.Context, act *Action[S, R, T]) (zeroT T, _ error) {
+	tx, err := e.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return zeroT, err
+	}
+
+	// TODO: Check current DB values. Return an error if the values does not meet preconditions.
+	s, err := act.Setup(ctx, tx)
+	if err != nil {
+		return zeroT, multierr.Append(err, tx.Rollback())
+	}
+
+	// TODO: Insert or update DB values. Return an error if the values does not meet postconditions.
+	r, err := act.Run(ctx, tx, s)
+	if err != nil {
+		return zeroT, multierr.Append(err, tx.Rollback())
+	}
+
+	if err := tx.Commit(); err != nil {
+		return zeroT, multierr.Append(err, tx.Rollback())
+	}
+
+	// TODO: Check DB values after commit whether they meet postconditions.
+	t, err := act.Teardown(ctx, e.DB, r)
+	if err != nil {
+		return zeroT, err
+	}
+
+	return t, nil
+}
 
 // Cond has the fields needed to operate a DB.
 type Cond struct {

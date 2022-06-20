@@ -15,12 +15,11 @@ import (
 
 // Cond has the fields needed to operate a DB.
 type Cond struct {
-	Writer  io.Writer
-	ini     ini
-	stmt    stmt
-	timeout time.Duration
-	where   where
-	set     set
+	Writer io.Writer
+	ini    ini
+	stmt   stmt
+	where  where
+	set    set
 }
 type ini struct {
 	path    string
@@ -46,10 +45,9 @@ type user struct {
 }
 
 // NewCond returns the info needed to operate a DB.
-func NewCond(iniPath, section string, timeout time.Duration, userId, status int) *Cond {
+func NewCond(iniPath, section string, userId, status int) *Cond {
 	return &Cond{
-		Writer:  os.Stdout,
-		timeout: timeout,
+		Writer: os.Stdout,
 		ini: ini{
 			path:    iniPath,
 			section: section,
@@ -66,11 +64,7 @@ func NewCond(iniPath, section string, timeout time.Duration, userId, status int)
 
 // Run does a DB operation.
 //TODO: How to shorten this function
-func (c *Cond) Run() (rerr error) {
-	// Rollback if the time limit is exceeded.
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
+func (c *Cond) Run(ctx context.Context) (rerr error) {
 	// Get DB handle.
 	db, err := dbx.OpenByIni(c.ini.path, c.ini.section)
 	if err != nil {

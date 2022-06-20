@@ -4,26 +4,26 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alecthomas/kingpin"
 	"github.com/exaream/go-db/example"
 	"go.uber.org/multierr"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 const (
 	version        = "0.1.0"
 	defaultIniPath = "example.ini"
 	defaultSection = "example"
-	defaultTimeout = 30
+	defaultTimeout = "30s"
 )
 
 // Arguments
 var (
 	app     = kingpin.New("example", "An example command made of Go to operate MySQL.")
+	iniPath = app.Flag("ini-path", "Set an ini file path.").Short('i').Default(defaultIniPath).String()
+	section = app.Flag("section", "Set a section name.").Short('s').Default(defaultSection).String()
+	timeout = app.Flag("timeout", "Set timeout.").Short('t').Default(defaultTimeout).Duration()
 	userId  = app.Flag("user-id", "Set user_id.").Int()
 	status  = app.Flag("status", "Set a status.").Int()
-	iniPath = app.Flag("ini-path", "Set an ini file path.").Default(defaultIniPath).String()
-	section = app.Flag("section", "Set a section name.").Default(defaultSection).String()
-	timeout = app.Flag("timeout", "Set seconds for timeout.").Int()
 )
 
 func init() {
@@ -33,11 +33,6 @@ func init() {
 	if _, err := app.Parse(os.Args[1:]); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
-	}
-	// Set default value.
-	// Because we can NOT use Int() and Default() at the same time.
-	if *timeout == 0 {
-		*timeout = defaultTimeout
 	}
 }
 

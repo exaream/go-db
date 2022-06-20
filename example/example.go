@@ -46,10 +46,10 @@ type user struct {
 }
 
 // NewCond returns the info needed to operate a DB.
-func NewCond(iniPath, section string, timeout, userId, status int) *Cond {
+func NewCond(iniPath, section string, timeout time.Duration, userId, status int) *Cond {
 	return &Cond{
 		Writer:  os.Stdout,
-		timeout: time.Duration(timeout) * time.Second,
+		timeout: timeout,
 		ini: ini{
 			path:    iniPath,
 			section: section,

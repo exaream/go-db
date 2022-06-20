@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -21,7 +22,7 @@ var (
 	app     = kingpin.New("example", "An example command made of Go to operate MySQL.")
 	iniPath = app.Flag("ini-path", "Set an ini file path.").Short('i').Default(defaultIniPath).String()
 	section = app.Flag("section", "Set a section name.").Short('s').Default(defaultSection).String()
-	timeout = app.Flag("timeout", "Set timeout.").Short('t').Default(defaultTimeout).Duration()
+	timeout = app.Flag("timeout", "Set timeout. e.g. 5s").Short('t').Default(defaultTimeout).Duration()
 	userId  = app.Flag("user-id", "Set user_id.").Int()
 	status  = app.Flag("status", "Set a status.").Int()
 )
@@ -37,9 +38,11 @@ func init() {
 }
 
 func main() {
-	c := example.NewCond(*iniPath, *section, *timeout, *userId, *status)
+	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
+	defer cancel()
 
-	if errs := c.Run(); errs != nil {
+	c := example.NewCond(*iniPath, *section, *userId, *status)
+	if errs := c.Run(ctx); errs != nil {
 		for _, err := range multierr.Errors(errs) {
 			fmt.Fprintln(os.Stderr, err)
 		}

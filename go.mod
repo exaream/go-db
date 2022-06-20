@@ -3,6 +3,7 @@ module github.com/exaream/go-db
 go 1.18
 
 require (
+	github.com/go-logr/logr v1.2.3
 	github.com/go-sql-driver/mysql v1.6.0
 	go.uber.org/multierr v1.8.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6

@@ -4,12 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
-
-	"go.uber.org/multierr"
 
 	"github.com/exaream/go-db/inix"
 )
@@ -31,8 +28,9 @@ type Conf struct {
 
 type Records map[int]map[string]any
 
-// OpenByIni returns a DB handle by an ini file.
-func OpenByIni(iniPath, section string) (*sql.DB, error) {
+// OpenByIniWithContext return valid DB handle by ini file.
+// TODO: Naming
+func OpenByIniWithContext(ctx context.Context, iniPath, section string) (*sql.DB, error) {
 	conf, err := ParseIni(iniPath, section)
 	if err != nil {
 		return nil, err
@@ -43,6 +41,10 @@ func OpenByIni(iniPath, section string) (*sql.DB, error) {
 		return nil, err
 	}
 
+	if err := db.PingContext(ctx); err != nil {
+		return nil, err
+	}
+
 	return db, nil
 }
 
@@ -50,18 +52,18 @@ func OpenByIni(iniPath, section string) (*sql.DB, error) {
 func ParseIni(iniPath, section string) (*Conf, error) {
 	sec, err := inix.ParseIni(iniPath, section)
 	if err != nil {
-		return nil, errors.New("faild to load a DSN file")
+		return nil, err
 	}
 
 	encodedPwd := sec.Key("password").String()
 	decodedPwd, err := base64.StdEncoding.DecodeString(encodedPwd)
 	if err != nil {
-		return nil, errors.New("failed to decode DB password")
+		return nil, err
 	}
 
 	port, err := sec.Key("port").Int()
 	if err != nil {
-		return nil, errors.New("failed to get port")
+		return nil, err
 	}
 
 	return &Conf{
@@ -76,7 +78,6 @@ func ParseIni(iniPath, section string) (*Conf, error) {
 }
 
 // Open returns a DB handle.
-// TODO: Is it better to use a receiver?
 func Open(c *Conf) (*sql.DB, error) {
 	srcName := fmt.Sprintf("%s:%s@%s(%s:%s)/%s",
 		c.Username, c.Password, c.Protocol, c.Host, strconv.Itoa(c.Port), c.DB)
@@ -100,15 +101,4 @@ func QueryWithContext(ctx context.Context, db *sql.DB, stmt string, fn func(cont
 		return nil, err
 	}
 	return fn(ctx, rows)
-}
-
-// Rollback rollbacks using transaction.
-// It can return multiple errors.
-// TODO: How to do test this function
-func Rollback(tx *sql.Tx, rerr, err error) error {
-	rerr = multierr.Append(rerr, err)
-	if rollbackErr := tx.Rollback(); rollbackErr != nil {
-		return multierr.Append(rerr, rollbackErr)
-	}
-	return rerr
 }

@@ -41,8 +41,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 	defer cancel()
 
-	c := example.NewCond(*iniPath, *section, *userId, *status)
-	if errs := c.Run(ctx); errs != nil {
+	c := example.NewCond(*userId, *status)
+	if errs := c.Run(ctx, *iniPath, *section); errs != nil {
 		for _, err := range multierr.Errors(errs) {
 			fmt.Fprintln(os.Stderr, err)
 		}

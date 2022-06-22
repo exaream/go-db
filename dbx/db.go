@@ -16,7 +16,7 @@ const (
 	YmdHis = "2006-01-02 15:04:05" // layout of "Y-m-d H:i:s"
 )
 
-type Conf struct {
+type Config struct {
 	Host     string
 	DB       string
 	Username string
@@ -49,7 +49,7 @@ func OpenByIniWithContext(ctx context.Context, iniPath, section string) (*sql.DB
 }
 
 // ParseIni returns DB's config info.
-func ParseIni(iniPath, section string) (*Conf, error) {
+func ParseIni(iniPath, section string) (*Config, error) {
 	sec, err := inix.ParseIni(iniPath, section)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func ParseIni(iniPath, section string) (*Conf, error) {
 		return nil, err
 	}
 
-	return &Conf{
+	return &Config{
 		Host:     sec.Key("host").String(),
 		DB:       sec.Key("database").String(),
 		Username: sec.Key("username").String(),
@@ -78,7 +78,7 @@ func ParseIni(iniPath, section string) (*Conf, error) {
 }
 
 // Open returns a DB handle.
-func Open(c *Conf) (*sql.DB, error) {
+func Open(c *Config) (*sql.DB, error) {
 	srcName := fmt.Sprintf("%s:%s@%s(%s:%s)/%s",
 		c.Username, c.Password, c.Protocol, c.Host, strconv.Itoa(c.Port), c.DB)
 

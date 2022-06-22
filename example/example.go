@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"go.uber.org/multierr"
+	"go.uber.org/zap"
 
 	"github.com/exaream/go-db/dbx"
 )
@@ -56,6 +57,11 @@ func NewCond(id, status int) *Cond {
 
 // Run does a DB operation.
 func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		return err
+	}
+
 	db, err := dbx.OpenWithContext(ctx, conf.Typ, conf.Dir, conf.Stem, conf.Section)
 	if err != nil {
 		return err
@@ -67,7 +73,7 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 		}
 	}()
 
-	fmt.Println(dbx.LF + "Before operating")
+	logger.Info("Before operation")
 
 	records, err := dbx.QueryWithContext(ctx, db, stmtQuery, scanRows)
 	if err != nil {
@@ -87,7 +93,7 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 	}
 
 	// fmt.Println(result.RowsAffected())
-	fmt.Println(dbx.LF + "Before commit")
+	logger.Info("Before commit")
 
 	records, err = dbx.QueryTxWithContext(ctx, tx, stmtQuery, scanRows)
 	if err != nil {
@@ -99,15 +105,13 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 		return multierr.Append(rerr, err)
 	}
 
-	fmt.Println(dbx.LF + "After operating")
+	logger.Info("After commit")
 
 	records, err = dbx.QueryWithContext(ctx, db, stmtQuery, scanRows)
 	if err != nil {
 		return err
 	}
 	fmt.Println(records)
-
-	fmt.Println("")
 
 	return nil
 }

@@ -6,8 +6,8 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/spf13/viper v1.12.0
 	go.uber.org/multierr v1.8.0
+	go.uber.org/zap v1.17.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
-	gopkg.in/ini.v1 v1.66.6
 )
 
 require (
@@ -28,6 +28,7 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
+	gopkg.in/ini.v1 v1.66.6 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

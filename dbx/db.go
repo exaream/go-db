@@ -8,17 +8,18 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/exaream/go-db/inix"
+	"github.com/spf13/viper"
 )
 
 const (
-	LF     = "\n"
-	YmdHis = "2006-01-02 15:04:05" // layout of "Y-m-d H:i:s"
+	DefaultTz = "Asia/Tokyo"
+	LF        = "\n"
+	YmdHis    = "2006-01-02 15:04:05" // layout of "Y-m-d H:i:s"
 )
 
-type Config struct {
+type Conf struct {
 	Host     string
-	DB       string
+	Database string
 	Username string
 	Password string
 	Protocol string
@@ -26,17 +27,18 @@ type Config struct {
 	Port     int
 }
 
-type Records map[int]map[string]any
-
-// OpenByIniWithContext return valid DB handle by ini file.
-// TODO: Naming
-func OpenByIniWithContext(ctx context.Context, iniPath, section string) (*sql.DB, error) {
-	conf, err := ParseIni(iniPath, section)
+func OpenWithContext(ctx context.Context, typ, dir, stem, section string) (*sql.DB, error) {
+	c, err := ParseConf(typ, dir, stem, section)
 	if err != nil {
 		return nil, err
 	}
 
-	db, err := Open(conf)
+	srcName := fmt.Sprintf("%s:%s@%s(%s:%s)/%s",
+		c.Username, c.Password, c.Protocol, c.Host, strconv.Itoa(c.Port), c.Database)
+
+	params := url.Values{"parseTime": {"true"}, "loc": {c.Tz}}
+
+	db, err := sql.Open("mysql", srcName+"?"+params.Encode())
 	if err != nil {
 		return nil, err
 	}
@@ -48,44 +50,36 @@ func OpenByIniWithContext(ctx context.Context, iniPath, section string) (*sql.DB
 	return db, nil
 }
 
-// ParseIni returns DB's config info.
-func ParseIni(iniPath, section string) (*Config, error) {
-	sec, err := inix.ParseIni(iniPath, section)
-	if err != nil {
+func ParseConf(typ, confPath, stem, section string) (*Conf, error) {
+	v := viper.New()
+	v.SetConfigType(typ)
+	v.AddConfigPath(confPath)
+	v.SetConfigName(stem) // the file stem (= the file name without the extension)
+
+	if err := v.ReadInConfig(); err != nil {
 		return nil, err
 	}
 
-	encodedPwd := sec.Key("password").String()
-	decodedPwd, err := base64.StdEncoding.DecodeString(encodedPwd)
-	if err != nil {
+	sub := v.Sub(section)
+	var c *Conf
+	if err := sub.Unmarshal(&c); err != nil {
 		return nil, err
 	}
 
-	port, err := sec.Key("port").Int()
+	password, err := base64.StdEncoding.DecodeString(c.Password)
 	if err != nil {
 		return nil, err
 	}
+	c.Password = string(password)
 
-	return &Config{
-		Host:     sec.Key("host").String(),
-		DB:       sec.Key("database").String(),
-		Username: sec.Key("username").String(),
-		Password: string(decodedPwd),
-		Protocol: sec.Key("protocol").String(),
-		Port:     port,
-		Tz:       "Asia/Tokyo",
-	}, nil
+	if c.Tz == "" {
+		c.Tz = DefaultTz
+	}
+
+	return c, nil
 }
 
-// Open returns a DB handle.
-func Open(c *Config) (*sql.DB, error) {
-	srcName := fmt.Sprintf("%s:%s@%s(%s:%s)/%s",
-		c.Username, c.Password, c.Protocol, c.Host, strconv.Itoa(c.Port), c.DB)
-
-	params := url.Values{"parseTime": {"true"}, "loc": {c.Tz}}
-
-	return sql.Open("mysql", srcName+"?"+params.Encode())
-}
+type Records map[int]map[string]any
 
 func QueryTxWithContext(ctx context.Context, tx *sql.Tx, stmt string, fn func(context.Context, *sql.Rows) (Records, error)) (Records, error) {
 	rows, err := tx.QueryContext(ctx, stmt)

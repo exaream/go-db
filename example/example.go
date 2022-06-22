@@ -17,12 +17,6 @@ const (
 	stmtCommand = `UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?;`
 )
 
-// Cond has the fields needed to operate a DB.
-type Cond struct {
-	userId int
-	status int
-}
-
 type user struct {
 	createdAt *time.Time
 	updatedAt *time.Time
@@ -31,19 +25,39 @@ type user struct {
 	status    int
 }
 
+// Cond has the fields needed to operate a DB.
+type Cond struct {
+	id     int
+	status int
+}
+
 // NewCond returns the info needed to operate a DB.
-func NewCond(userId, status int) *Cond {
+func NewCond(id, status int) *Cond {
 	return &Cond{
 		status: status,
-		userId: userId,
+		id:     id,
+	}
+}
+
+type Conf struct {
+	Typ     string
+	Dir     string
+	Stem    string
+	Section string
+}
+
+func NewConf(typ, dir, stem, section string) *Conf {
+	return &Conf{
+		Typ:     typ,
+		Dir:     dir,
+		Stem:    stem,
+		Section: section,
 	}
 }
 
 // Run does a DB operation.
-//TODO: How to shorten this function
-func (c *Cond) Run(ctx context.Context, iniPath, section string) (rerr error) {
-	// Get DB handle.
-	db, err := dbx.OpenByIniWithContext(ctx, iniPath, section)
+func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
+	db, err := dbx.OpenWithContext(ctx, conf.Typ, conf.Dir, conf.Stem, conf.Section)
 	if err != nil {
 		return err
 	}
@@ -68,7 +82,7 @@ func (c *Cond) Run(ctx context.Context, iniPath, section string) (rerr error) {
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, stmtCommand, c.status, c.userId)
+	_, err = tx.ExecContext(ctx, stmtCommand, cond.status, cond.id)
 	if err != nil {
 		return multierr.Append(rerr, err)
 	}

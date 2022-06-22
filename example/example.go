@@ -24,26 +24,17 @@ type user struct {
 	id        int
 	status    int
 }
-
-// Cond has the fields needed to operate a DB.
-type Cond struct {
-	id     int
-	status int
-}
-
-// NewCond returns the info needed to operate a DB.
-func NewCond(id, status int) *Cond {
-	return &Cond{
-		status: status,
-		id:     id,
-	}
-}
-
 type Conf struct {
 	Typ     string
 	Dir     string
 	Stem    string
 	Section string
+}
+
+// Cond has the fields needed to operate a DB.
+type Cond struct {
+	id     int
+	status int
 }
 
 func NewConf(typ, dir, stem, section string) *Conf {
@@ -52,6 +43,14 @@ func NewConf(typ, dir, stem, section string) *Conf {
 		Dir:     dir,
 		Stem:    stem,
 		Section: section,
+	}
+}
+
+// NewCond returns the info needed to operate a DB.
+func NewCond(id, status int) *Cond {
+	return &Cond{
+		status: status,
+		id:     id,
 	}
 }
 

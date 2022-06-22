@@ -24,16 +24,6 @@ var (
 	status  = app.Flag("status", "Set a status.").Int()
 )
 
-type Conf struct {
-	Host     string
-	DB       string
-	Username string
-	Password string
-	Protocol string
-	Tz       string
-	Port     int
-}
-
 func init() {
 	app.Version(version)
 

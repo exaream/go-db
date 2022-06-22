@@ -18,41 +18,44 @@ const (
 	stmtCommand = `UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?;`
 )
 
+// Conf has configurations to create DB handle.
+type Conf struct {
+	typ     string
+	dir     string
+	stem    string
+	section string
+}
+
+// Cond has conditions to create SQL.
+type Cond struct {
+	id     int
+	status int
+}
+
+// NewConf returns configurations to create DB handle.
+func NewConf(typ, dir, stem, section string) *Conf {
+	return &Conf{
+		typ:     typ,
+		dir:     dir,
+		stem:    stem,
+		section: section,
+	}
+}
+
+// NewCond returns conditions to create SQL.
+func NewCond(id, status int) *Cond {
+	return &Cond{
+		status: status,
+		id:     id,
+	}
+}
+
 type user struct {
 	createdAt *time.Time
 	updatedAt *time.Time
 	name      string
 	id        int
 	status    int
-}
-type Conf struct {
-	Typ     string
-	Dir     string
-	Stem    string
-	Section string
-}
-
-// Cond has the fields needed to operate a DB.
-type Cond struct {
-	id     int
-	status int
-}
-
-func NewConf(typ, dir, stem, section string) *Conf {
-	return &Conf{
-		Typ:     typ,
-		Dir:     dir,
-		Stem:    stem,
-		Section: section,
-	}
-}
-
-// NewCond returns the info needed to operate a DB.
-func NewCond(id, status int) *Cond {
-	return &Cond{
-		status: status,
-		id:     id,
-	}
 }
 
 // Run does a DB operation.
@@ -62,7 +65,7 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 		return err
 	}
 
-	db, err := dbx.OpenWithContext(ctx, conf.Typ, conf.Dir, conf.Stem, conf.Section)
+	db, err := dbx.OpenWithContext(ctx, conf.typ, conf.dir, conf.stem, conf.section)
 	if err != nil {
 		return err
 	}

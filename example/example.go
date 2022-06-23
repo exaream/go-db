@@ -32,6 +32,14 @@ type Cond struct {
 	status int
 }
 
+type user struct {
+	createdAt *time.Time
+	updatedAt *time.Time
+	name      string
+	id        int
+	status    int
+}
+
 // NewConf returns configurations to create DB handle.
 func NewConf(typ, dir, stem, section string) *Conf {
 	return &Conf{
@@ -48,14 +56,6 @@ func NewCond(id, status int) *Cond {
 		status: status,
 		id:     id,
 	}
-}
-
-type user struct {
-	createdAt *time.Time
-	updatedAt *time.Time
-	name      string
-	id        int
-	status    int
 }
 
 // Run does a DB operation.

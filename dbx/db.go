@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )
 
@@ -27,7 +28,7 @@ type Conf struct {
 	Port     int
 }
 
-func OpenWithContext(ctx context.Context, typ, dir, stem, section string) (*sql.DB, error) {
+func OpenWithContext(ctx context.Context, typ, dir, stem, section string) (*sqlx.DB, error) {
 	c, err := ParseConf(typ, dir, stem, section)
 	if err != nil {
 		return nil, err
@@ -38,7 +39,7 @@ func OpenWithContext(ctx context.Context, typ, dir, stem, section string) (*sql.
 
 	params := url.Values{"parseTime": {"true"}, "loc": {c.Tz}}
 
-	db, err := sql.Open("mysql", srcName+"?"+params.Encode())
+	db, err := sqlx.Open("mysql", srcName+"?"+params.Encode())
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func QueryTxWithContext(ctx context.Context, tx *sql.Tx, stmt string, fn func(co
 	return fn(ctx, rows)
 }
 
-func QueryWithContext(ctx context.Context, db *sql.DB, stmt string, fn func(context.Context, *sql.Rows) (Records, error)) (Records, error) {
+func QueryWithContext(ctx context.Context, db *sqlx.DB, stmt string, fn func(context.Context, *sql.Rows) (Records, error)) (Records, error) {
 	rows, err := db.QueryContext(ctx, stmt)
 	if err != nil {
 		return nil, err

@@ -59,8 +59,11 @@ func initTable(typ, dir, stem, section string) (err error) {
 		return multierr.Append(err, tx.Rollback())
 	}
 
-	// The time when Doc Brown arrived in the past in the movie "Back to the Future 3"
-	defTime, _ := time.Parse(dbutil.YmdHis, "2001-01-01 00:00:00")
+	defTime, err := defaultTime()
+	if err != nil {
+		return err
+	}
+
 	var users = []example.User{
 		{1, "Alice", "example1@example.com", 0, &defTime, &defTime},
 		{2, "Billy", "example2@example.com", 0, &defTime, &defTime},
@@ -72,4 +75,19 @@ func initTable(typ, dir, stem, section string) (err error) {
 	}
 
 	return nil
+}
+
+func defaultTime() (def time.Time, _ error) {
+	tz, err := time.LoadLocation(dbutil.Tz)
+	if err != nil {
+		return def, err
+	}
+
+	// FYI: Doc Brown wrote a letter to Marty on September 1st, 1885 in the movie "Back to the Future 3".
+	res, err := time.ParseInLocation(dbutil.YmdHis, "1885-09-01 00:00:00", tz)
+	if err != nil {
+		return def, err
+	}
+
+	return res, nil
 }

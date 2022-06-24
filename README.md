@@ -22,15 +22,16 @@ Version
 # go run main.go --version
 ```
 
-Max arguments
-```shell
-# cd /go/src/work/cmd/example
-# go run main.go --ini-path=example.ini --section=example --timeout=10 --user-id=2 --status=1
-```
 Minimum arguments
 ```shell
 # cd /go/src/work/cmd/example
-# go run main.go --user-id=2 --status=1
+# go run main.go --id=2 --status=1
+```
+
+Max arguments
+```shell
+# cd /go/src/work/cmd/example
+# go run main.go --type=ini --dir=. --stem=example --section=example_section --timeout=10s --id=1 --status=2
 ```
 
 How to access phpMyAdmin

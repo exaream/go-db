@@ -17,6 +17,15 @@ const (
 	stmtCommand = `UPDATE users SET status = :status, updated_at = NOW() WHERE id = :id;`
 )
 
+type User struct {
+	ID        int        `db:"id"`
+	Name      string     `db:"name"`
+	Email     string     `db:"email"`
+	Status    int        `db:"status"`
+	CreatedAt *time.Time `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+}
+
 // Conf has configurations to create DB handle.
 type Conf struct {
 	typ     string
@@ -29,15 +38,6 @@ type Conf struct {
 type Cond struct {
 	id     int
 	status int
-}
-
-type User struct {
-	ID        int        `db:"id"`
-	Name      string     `db:"name"`
-	Email     string     `db:"email"`
-	Status    int        `db:"status"`
-	CreatedAt *time.Time `db:"created_at"`
-	UpdatedAt *time.Time `db:"updated_at"`
 }
 
 // NewConf returns configurations to create DB handle.

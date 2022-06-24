@@ -15,9 +15,10 @@ const (
 	confType    = "ini"
 	confStem    = "example"
 	confSection = "example_section"
+
 	// SQL
-	dropTblStmt   = "DROP TABLE IF EXISTS `example_db`.`users`"
-	createTblStmt = `CREATE TABLE example_db.users (
+	stmtDropTbl   = `DROP TABLE IF EXISTS example_db.users`
+	stmtCreateTbl = `CREATE TABLE example_db.users (
 		id int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 		name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
 		email varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -26,14 +27,14 @@ const (
 		updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		PRIMARY KEY (id)
 	  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
-	insertStmt = "INSERT INTO `example_db`.`users` (`id`, `name`, `email`, `status`, `created_at`, `updated_at`) VALUES (:id, :name, :email, :status, :created_at, :updated_at)"
+	stmtInsert = `INSERT INTO example_db.users (id, name, email, status, created_at, updated_at) 
+	    VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 )
 
 var confDir = string(filepath.Separator) + filepath.Join("go", "src", "work", "cmd", "example")
 
-// We can use the following SQL to initialize DB.
+// You can also use the following SQL to initialize the testing DB.
 // /go/src/work/_local/mysql/setup/ddl/example_db.sql
-// But I wrote bulk insert for as a sample.
 func initTable(typ, dir, stem, section string) (err error) {
 	ctx := context.Context(context.Background())
 
@@ -50,22 +51,23 @@ func initTable(typ, dir, stem, section string) (err error) {
 
 	tx := db.MustBeginTx(ctx, nil)
 
-	if _, err := tx.ExecContext(ctx, dropTblStmt); err != nil {
+	if _, err := tx.ExecContext(ctx, stmtDropTbl); err != nil {
 		return multierr.Append(err, tx.Rollback())
 	}
 
-	if _, err := tx.ExecContext(ctx, createTblStmt); err != nil {
+	if _, err := tx.ExecContext(ctx, stmtCreateTbl); err != nil {
 		return multierr.Append(err, tx.Rollback())
 	}
 
-	defTime, _ := time.Parse(dbutil.YmdHis, "2022-01-01 00:00:00")
+	// The time when Doc Brown arrived in the past in the movie "Back to the Future 3"
+	defTime, _ := time.Parse(dbutil.YmdHis, "2001-01-01 00:00:00")
 	var users = []example.User{
 		{1, "Alice", "example1@example.com", 0, &defTime, &defTime},
 		{2, "Billy", "example2@example.com", 0, &defTime, &defTime},
 		{3, "Chris", "example3@example.com", 0, &defTime, &defTime},
 	}
 
-	if _, err := tx.NamedExecContext(ctx, insertStmt, users); err != nil {
+	if _, err := tx.NamedExecContext(ctx, stmtInsert, users); err != nil {
 		return multierr.Append(err, tx.Rollback())
 	}
 

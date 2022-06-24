@@ -36,7 +36,6 @@ func init() {
 
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
-
 	defer cancel()
 
 	conf := ex.NewConf(*typ, *dir, *stem, *section)

@@ -1,8 +1,7 @@
-package dbx
+package dbutil
 
 import (
 	"context"
-	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"net/url"
@@ -14,7 +13,6 @@ import (
 
 const (
 	DefaultTz = "Asia/Tokyo"
-	LF        = "\n"
 	YmdHis    = "2006-01-02 15:04:05" // layout of "Y-m-d H:i:s"
 )
 
@@ -78,22 +76,4 @@ func ParseConf(typ, confPath, stem, section string) (*Conf, error) {
 	}
 
 	return c, nil
-}
-
-type Records map[int]map[string]any
-
-func QueryTxWithContext(ctx context.Context, tx *sql.Tx, stmt string, fn func(context.Context, *sql.Rows) (Records, error)) (Records, error) {
-	rows, err := tx.QueryContext(ctx, stmt)
-	if err != nil {
-		return nil, err
-	}
-	return fn(ctx, rows)
-}
-
-func QueryWithContext(ctx context.Context, db *sqlx.DB, stmt string, fn func(context.Context, *sql.Rows) (Records, error)) (Records, error) {
-	rows, err := db.QueryContext(ctx, stmt)
-	if err != nil {
-		return nil, err
-	}
-	return fn(ctx, rows)
 }

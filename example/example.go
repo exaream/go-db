@@ -2,7 +2,6 @@ package example
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -10,44 +9,48 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
-	"github.com/exaream/go-db/dbx"
+	"github.com/exaream/go-db/dbutil"
 )
 
 const (
 	stmtQuery   = `SELECT id, name, status, created_at, updated_at FROM users;`
-	stmtCommand = `UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?;`
+	stmtCommand = `UPDATE users SET status = :status, updated_at = NOW() WHERE id = :id;`
 )
 
-type user struct {
-	createdAt *time.Time
-	updatedAt *time.Time
-	name      string
-	id        int
-	status    int
-}
+// Conf has configurations to create DB handle.
 type Conf struct {
-	Typ     string
-	Dir     string
-	Stem    string
-	Section string
+	typ     string
+	dir     string
+	stem    string
+	section string
 }
 
-// Cond has the fields needed to operate a DB.
+// Cond has conditions to create SQL.
 type Cond struct {
 	id     int
 	status int
 }
 
+type User struct {
+	ID        int        `db:"id"`
+	Name      string     `db:"name"`
+	Email     string     `db:"email"`
+	Status    int        `db:"status"`
+	CreatedAt *time.Time `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+}
+
+// NewConf returns configurations to create DB handle.
 func NewConf(typ, dir, stem, section string) *Conf {
 	return &Conf{
-		Typ:     typ,
-		Dir:     dir,
-		Stem:    stem,
-		Section: section,
+		typ:     typ,
+		dir:     dir,
+		stem:    stem,
+		section: section,
 	}
 }
 
-// NewCond returns the info needed to operate a DB.
+// NewCond returns conditions to create SQL.
 func NewCond(id, status int) *Cond {
 	return &Cond{
 		status: status,
@@ -62,7 +65,7 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 		return err
 	}
 
-	db, err := dbx.OpenWithContext(ctx, conf.Typ, conf.Dir, conf.Stem, conf.Section)
+	db, err := dbutil.OpenWithContext(ctx, conf.typ, conf.dir, conf.stem, conf.section)
 	if err != nil {
 		return err
 	}
@@ -75,80 +78,48 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 
 	logger.Info("Before operation")
 
-	records, err := dbx.QueryWithContext(ctx, db, stmtQuery, scanRows)
+	var users []User
+	err = db.SelectContext(ctx, &users, stmtQuery)
 	if err != nil {
 		return err
 	}
-	fmt.Println(records)
+	for _, u := range users {
+		fmt.Println(u.ID, u.Name, u.Status, u.CreatedAt.Format(dbutil.YmdHis), u.UpdatedAt.Format(dbutil.YmdHis))
+	}
 
 	// Begin transaction.
-	tx, err := db.BeginTx(ctx, nil)
+	tx := db.MustBeginTx(ctx, nil)
+
+	args := map[string]any{"id": cond.id, "status": cond.status}
+	_, err = tx.NamedExecContext(ctx, stmtCommand, args)
 	if err != nil {
-		return err
+		return multierr.Append(err, tx.Rollback())
 	}
 
-	_, err = tx.ExecContext(ctx, stmtCommand, cond.status, cond.id)
-	if err != nil {
-		return multierr.Append(rerr, err)
-	}
-
-	// fmt.Println(result.RowsAffected())
+	//fmt.Println(result.RowsAffected())
 	logger.Info("Before commit")
 
-	records, err = dbx.QueryTxWithContext(ctx, tx, stmtQuery, scanRows)
+	users = []User{}
+	err = tx.SelectContext(ctx, &users, stmtQuery)
 	if err != nil {
 		return err
 	}
-	fmt.Println(records)
-
+	for _, u := range users {
+		fmt.Println(u.ID, u.Name, u.Status, u.CreatedAt.Format(dbutil.YmdHis), u.UpdatedAt.Format(dbutil.YmdHis))
+	}
 	if err := tx.Commit(); err != nil {
 		return multierr.Append(rerr, err)
 	}
 
 	logger.Info("After commit")
-
-	records, err = dbx.QueryWithContext(ctx, db, stmtQuery, scanRows)
+	users = []User{}
+	err = db.SelectContext(ctx, &users, stmtQuery)
 	if err != nil {
 		return err
 	}
-	fmt.Println(records)
-
-	return nil
-}
-
-// TODO: How to apply `user` type to `records` using generics.
-func scanRows(ctx context.Context, rows *sql.Rows) (_ dbx.Records, err error) {
-	defer func() {
-		if rerr := rows.Close(); err == nil && rerr != nil {
-			err = rerr
-		}
-		// Check errors other than EOL error
-		if rerr := rows.Err(); err == nil && rerr != nil {
-			err = rerr
-		}
-	}()
-
-	records := make(dbx.Records) // 並行時の競合を避けるため初期化
-
-	// Please change the following when creating your own package.
-	for rows.Next() {
-		var u user
-		// TODO: How to abstruct and inject the following arguments.
-		err := rows.Scan(&u.id, &u.name, &u.status, &u.createdAt, &u.updatedAt)
-		if err != nil {
-			return nil, err
-		}
-
-		records[u.id] = map[string]any{
-			"id":        u.id,
-			"name":      u.name,
-			"status":    u.status,
-			"createdAt": u.createdAt.Format(dbx.YmdHis),
-			"updatedAt": u.updatedAt.Format(dbx.YmdHis),
-		}
-
-		fmt.Println(u.id, u.name, u.status, u.createdAt.Format(dbx.YmdHis), u.updatedAt.Format(dbx.YmdHis))
+	for _, u := range users {
+		fmt.Println(u.ID, u.Name, u.Status, u.CreatedAt.Format(dbutil.YmdHis), u.UpdatedAt.Format(dbutil.YmdHis))
 	}
 
-	return records, nil
+	return nil
 }

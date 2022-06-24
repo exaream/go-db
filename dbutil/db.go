@@ -1,19 +1,18 @@
-package dbx
+package dbutil
 
 import (
 	"context"
-	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"net/url"
 	"strconv"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 )
 
 const (
 	DefaultTz = "Asia/Tokyo"
-	LF        = "\n"
 	YmdHis    = "2006-01-02 15:04:05" // layout of "Y-m-d H:i:s"
 )
 
@@ -27,7 +26,7 @@ type Conf struct {
 	Port     int
 }
 
-func OpenWithContext(ctx context.Context, typ, dir, stem, section string) (*sql.DB, error) {
+func OpenWithContext(ctx context.Context, typ, dir, stem, section string) (*sqlx.DB, error) {
 	c, err := ParseConf(typ, dir, stem, section)
 	if err != nil {
 		return nil, err
@@ -38,7 +37,7 @@ func OpenWithContext(ctx context.Context, typ, dir, stem, section string) (*sql.
 
 	params := url.Values{"parseTime": {"true"}, "loc": {c.Tz}}
 
-	db, err := sql.Open("mysql", srcName+"?"+params.Encode())
+	db, err := sqlx.Open("mysql", srcName+"?"+params.Encode())
 	if err != nil {
 		return nil, err
 	}
@@ -77,22 +76,4 @@ func ParseConf(typ, confPath, stem, section string) (*Conf, error) {
 	}
 
 	return c, nil
-}
-
-type Records map[int]map[string]any
-
-func QueryTxWithContext(ctx context.Context, tx *sql.Tx, stmt string, fn func(context.Context, *sql.Rows) (Records, error)) (Records, error) {
-	rows, err := tx.QueryContext(ctx, stmt)
-	if err != nil {
-		return nil, err
-	}
-	return fn(ctx, rows)
-}
-
-func QueryWithContext(ctx context.Context, db *sql.DB, stmt string, fn func(context.Context, *sql.Rows) (Records, error)) (Records, error) {
-	rows, err := db.QueryContext(ctx, stmt)
-	if err != nil {
-		return nil, err
-	}
-	return fn(ctx, rows)
 }

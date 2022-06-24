@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	DefaultTz = "Asia/Tokyo"
-	YmdHis    = "2006-01-02 15:04:05" // layout of "Y-m-d H:i:s"
+	Tz     = "Asia/Tokyo"
+	YmdHis = "2006-01-02 15:04:05" // layout of "Y-m-d H:i:s"
 )
 
 type Conf struct {
@@ -72,7 +72,7 @@ func ParseConf(typ, confPath, stem, section string) (*Conf, error) {
 	c.Password = string(password)
 
 	if c.Tz == "" {
-		c.Tz = DefaultTz
+		c.Tz = Tz
 	}
 
 	return c, nil

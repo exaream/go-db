@@ -3,6 +3,7 @@ package example_test
 import (
 	"context"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/exaream/go-db/dbutil"
@@ -17,8 +18,8 @@ const (
 	confSection = "example_section"
 
 	// SQL
-	stmtDropTbl   = `DROP TABLE IF EXISTS example_db.users`
-	stmtCreateTbl = `CREATE TABLE example_db.users (
+	queryDropTbl   = `DROP TABLE IF EXISTS example_db.users`
+	queryCreateTbl = `CREATE TABLE example_db.users (
 		id int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 		name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
 		email varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -27,7 +28,7 @@ const (
 		updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		PRIMARY KEY (id)
 	  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
-	stmtInsert = `INSERT INTO example_db.users (id, name, email, status, created_at, updated_at) 
+	queryInsert = `INSERT INTO example_db.users (id, name, email, status, created_at, updated_at) 
 	    VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 )
 
@@ -51,43 +52,29 @@ func initTable(typ, dir, stem, section string) (err error) {
 
 	tx := db.MustBeginTx(ctx, nil)
 
-	if _, err := tx.ExecContext(ctx, stmtDropTbl); err != nil {
+	if _, err := tx.ExecContext(ctx, queryDropTbl); err != nil {
 		return multierr.Append(err, tx.Rollback())
 	}
 
-	if _, err := tx.ExecContext(ctx, stmtCreateTbl); err != nil {
+	if _, err := tx.ExecContext(ctx, queryCreateTbl); err != nil {
 		return multierr.Append(err, tx.Rollback())
 	}
 
-	defTime, err := defaultTime()
-	if err != nil {
-		return err
-	}
-
-	var users = []example.User{
-		{1, "Alice", "example1@example.com", 0, &defTime, &defTime},
-		{2, "Billy", "example2@example.com", 0, &defTime, &defTime},
-		{3, "Chris", "example3@example.com", 0, &defTime, &defTime},
-	}
-
-	if _, err := tx.NamedExecContext(ctx, stmtInsert, users); err != nil {
+	if _, err := tx.NamedExecContext(ctx, queryInsert, testUsers()); err != nil {
 		return multierr.Append(err, tx.Rollback())
 	}
 
 	return nil
 }
 
-func defaultTime() (def time.Time, _ error) {
-	tz, err := time.LoadLocation(dbutil.Tz)
-	if err != nil {
-		return def, err
+func testUsers() []example.User {
+	var users []example.User
+	names := map[int]string{1: "Alice", 2: "Bobby", 3: "Chris", 4: "Daisy", 5: "Elise"}
+	now := time.Now()
+
+	for i := 1; i <= len(names); i++ {
+		users = append(users, example.User{i, names[i], "example" + strconv.Itoa(i) + "@examle.com", 0, &now, &now})
 	}
 
-	// FYI: Doc Brown wrote a letter to Marty on September 1st, 1885 in the movie "Back to the Future 3".
-	res, err := time.ParseInLocation(dbutil.YmdHis, "1885-09-01 00:00:00", tz)
-	if err != nil {
-		return def, err
-	}
-
-	return res, nil
+	return users
 }

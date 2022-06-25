@@ -13,10 +13,12 @@ import (
 )
 
 const (
+	// SQL
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users;`
 	queryUpdate = `UPDATE users SET status = :status, updated_at = NOW() WHERE id = :id;`
 )
 
+// Struct of users table
 type User struct {
 	ID        int        `db:"id"`
 	Name      string     `db:"name"`
@@ -29,8 +31,7 @@ type User struct {
 // Conf has configurations to create DB handle.
 type Conf struct {
 	typ     string
-	dir     string
-	stem    string
+	path    string
 	section string
 }
 
@@ -41,11 +42,10 @@ type Cond struct {
 }
 
 // NewConf returns configurations to create DB handle.
-func NewConf(typ, dir, stem, section string) *Conf {
+func NewConf(typ, path, section string) *Conf {
 	return &Conf{
 		typ:     typ,
-		dir:     dir,
-		stem:    stem,
+		path:    path,
 		section: section,
 	}
 }
@@ -65,7 +65,12 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 		return err
 	}
 
-	db, err := dbutil.OpenWithContext(ctx, conf.typ, conf.dir, conf.stem, conf.section)
+	dbConf, err := dbutil.ParseConf(conf.typ, conf.path, conf.section)
+	if err != nil {
+		return err
+	}
+
+	db, err := dbutil.OpenWithContext(ctx, dbConf)
 	if err != nil {
 		return err
 	}

@@ -49,10 +49,10 @@ func OpenWithContext(ctx context.Context, typ, dir, stem, section string) (*sqlx
 	return db, nil
 }
 
-func ParseConf(typ, confPath, stem, section string) (*Conf, error) {
+func ParseConf(typ, dir, stem, section string) (*Conf, error) {
 	v := viper.New()
 	v.SetConfigType(typ)
-	v.AddConfigPath(confPath)
+	v.AddConfigPath(dir)
 	v.SetConfigName(stem) // the file stem (= the file name without the extension)
 
 	if err := v.ReadInConfig(); err != nil {

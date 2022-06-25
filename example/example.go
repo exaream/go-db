@@ -53,8 +53,8 @@ func NewConf(typ, dir, stem, section string) *Conf {
 // NewCond returns conditions to create SQL.
 func NewCond(id, status int) *Cond {
 	return &Cond{
-		status: status,
 		id:     id,
+		status: status,
 	}
 }
 

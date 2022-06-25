@@ -31,7 +31,7 @@ Minimum arguments
 Max arguments
 ```shell
 # cd /go/src/work/cmd/example
-# go run main.go --type=ini --dir=. --stem=example --section=example_section --timeout=10s --id=1 --status=2
+# go run main.go --type=ini --path=example.dsn --section=example_section --timeout=10s --id=1 --status=2
 ```
 
 How to access phpMyAdmin

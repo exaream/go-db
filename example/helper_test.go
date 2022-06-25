@@ -2,21 +2,15 @@ package example_test
 
 import (
 	"context"
-	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/exaream/go-db/dbutil"
-	"github.com/exaream/go-db/example"
+	ex "github.com/exaream/go-db/example"
 	"go.uber.org/multierr"
 )
 
 const (
-	// DB config
-	confType    = "ini"
-	confStem    = "example"
-	confSection = "example_section"
-
 	// SQL
 	queryDropTbl   = `DROP TABLE IF EXISTS example_db.users`
 	queryCreateTbl = `CREATE TABLE example_db.users (
@@ -32,14 +26,11 @@ const (
 	    VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 )
 
-var confDir = string(filepath.Separator) + filepath.Join("go", "src", "work", "cmd", "example")
-
+// initTableContext initializes table(s) for testing.
 // You can also use the following SQL to initialize the testing DB.
 // /go/src/work/_local/mysql/setup/ddl/example_db.sql
-func initTable(typ, dir, stem, section string) (err error) {
-	ctx := context.Context(context.Background())
-
-	db, err := dbutil.OpenWithContext(ctx, typ, dir, stem, section)
+func initTableContext(ctx context.Context, conf *dbutil.Conf) (err error) {
+	db, err := dbutil.OpenWithContext(ctx, conf)
 	if err != nil {
 		return err
 	}
@@ -67,13 +58,14 @@ func initTable(typ, dir, stem, section string) (err error) {
 	return nil
 }
 
-func testUsers() []example.User {
-	var users []example.User
+// testUsers returns user data for testing.
+func testUsers() []ex.User {
+	var users []ex.User
 	names := map[int]string{1: "Alice", 2: "Bobby", 3: "Chris", 4: "Daisy", 5: "Elise"}
 	now := time.Now()
 
 	for i := 1; i <= len(names); i++ {
-		users = append(users, example.User{i, names[i], "example" + strconv.Itoa(i) + "@examle.com", 0, &now, &now})
+		users = append(users, ex.User{i, names[i], "example" + strconv.Itoa(i) + "@examle.com", 0, &now, &now})
 	}
 
 	return users

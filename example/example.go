@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	stmtQuery   = `SELECT id, name, status, created_at, updated_at FROM users;`
-	stmtCommand = `UPDATE users SET status = :status, updated_at = NOW() WHERE id = :id;`
+	querySelect = `SELECT id, name, status, created_at, updated_at FROM users;`
+	queryUpdate = `UPDATE users SET status = :status, updated_at = NOW() WHERE id = :id;`
 )
 
 type User struct {
@@ -79,7 +79,7 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 	logger.Info("Before operation")
 
 	var users []User
-	err = db.SelectContext(ctx, &users, stmtQuery)
+	err = db.SelectContext(ctx, &users, querySelect)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 	tx := db.MustBeginTx(ctx, nil)
 
 	args := map[string]any{"id": cond.id, "status": cond.status}
-	_, err = tx.NamedExecContext(ctx, stmtCommand, args)
+	_, err = tx.NamedExecContext(ctx, queryUpdate, args)
 	if err != nil {
 		return multierr.Append(err, tx.Rollback())
 	}
@@ -100,7 +100,7 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 	logger.Info("Before commit")
 
 	users = []User{}
-	err = tx.SelectContext(ctx, &users, stmtQuery)
+	err = tx.SelectContext(ctx, &users, querySelect)
 	if err != nil {
 		return err
 	}
@@ -112,8 +112,9 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 	}
 
 	logger.Info("After commit")
+
 	users = []User{}
-	err = db.SelectContext(ctx, &users, stmtQuery)
+	err = db.SelectContext(ctx, &users, querySelect)
 	if err != nil {
 		return err
 	}

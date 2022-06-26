@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	ex "github.com/exaream/go-db/example"
+	"github.com/exaream/go-db/example"
 	"go.uber.org/multierr"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -37,10 +37,10 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 	defer cancel()
 
-	conf := ex.NewConf(*typ, *path, *section)
-	cond := ex.NewCond(*id, *status)
+	conf := example.NewConf(*typ, *path, *section)
+	cond := example.NewCond(*id, *status)
 
-	if errs := ex.Run(ctx, conf, cond); errs != nil {
+	if errs := example.Run(ctx, conf, cond); errs != nil {
 		for _, err := range multierr.Errors(errs) {
 			fmt.Fprintln(os.Stderr, err)
 		}

@@ -80,12 +80,11 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 	}
 
 	ex.logger.Info("Start")
-
 	defer func() {
-		ex.logger.Info("End")
 		if err := ex.db.Close(); err != nil {
 			rerr = err
 		}
+		ex.logger.Info("End")
 	}()
 
 	if _, err := ex.selectContext(ctx, cond); err != nil {
@@ -93,7 +92,7 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 	}
 
 	tx := ex.db.MustBeginTx(ctx, nil)
-	if _, err := ex.updateContext(ctx, tx, cond); err != nil {
+	if _, err := ex.updateTxContext(ctx, tx, cond); err != nil {
 		return err
 	}
 
@@ -153,7 +152,7 @@ func (ex *executor) selectContext(ctx context.Context, cond *Cond) ([]User, erro
 	return users, nil
 }
 
-func (ex *executor) updateContext(ctx context.Context, tx *sqlx.Tx, cond *Cond) (int64, error) {
+func (ex *executor) updateTxContext(ctx context.Context, tx *sqlx.Tx, cond *Cond) (int64, error) {
 	args := map[string]any{"id": cond.id, "status": cond.afterSts}
 	result, err := tx.NamedExecContext(ctx, queryUpdate, args)
 	if err != nil {

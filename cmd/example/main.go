@@ -10,7 +10,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-const version = "0.1.0"
+const version = "v0.2.0"
 
 // Arguments
 var (
@@ -18,8 +18,8 @@ var (
 	typ     = app.Flag("type", "Set a config type.").Default("ini").String()
 	path    = app.Flag("path", "Set a config file path.").Default("example.dsn").String()
 	section = app.Flag("section", "Set a config section name.").Default("example_section").String()
-	timeout = app.Flag("timeout", "Set timeout. e.g. 5s").Default("30s").Duration()
-	id      = app.Flag("id", "Set id.").Int()
+	timeout = app.Flag("timeout", "Set a timeout value. e.g. 5s").Default("10s").Duration()
+	id      = app.Flag("id", "Set an ID.").Int()
 	status  = app.Flag("status", "Set a status.").Int()
 )
 

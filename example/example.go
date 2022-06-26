@@ -15,7 +15,7 @@ import (
 
 const (
 	// SQL
-	querySelect = `SELECT id, name, status, created_at, updated_at FROM users;`
+	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id;`
 	queryUpdate = `UPDATE users SET status = :status, updated_at = NOW() WHERE id = :id;`
 )
 
@@ -34,17 +34,18 @@ func (u User) String() string {
 	return fmt.Sprintf("%d\t%s\t%v\t%s\t%s", u.ID, u.Name, u.Status, u.CreatedAt.Format(dbutil.YmdHis), u.UpdatedAt.Format(dbutil.YmdHis))
 }
 
+// Cond has conditions to create SQL.
+type Cond struct {
+	id        int
+	beforeSts int
+	afterSts  int
+}
+
 // Conf has configurations to create DB handle.
 type Conf struct {
 	typ     string
 	path    string
 	section string
-}
-
-// Cond has conditions to create SQL.
-type Cond struct {
-	id     int
-	status int
 }
 
 type executor struct {
@@ -62,10 +63,11 @@ func NewConf(typ, path, section string) *Conf {
 }
 
 // NewCond returns conditions to create SQL.
-func NewCond(id, status int) *Cond {
+func NewCond(id, beforeSts, afterSts int) *Cond {
 	return &Cond{
-		id:     id,
-		status: status,
+		id:        id,
+		beforeSts: beforeSts,
+		afterSts:  afterSts,
 	}
 }
 
@@ -77,25 +79,36 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 		return err
 	}
 
+	ex.logger.Info("Start")
+
 	defer func() {
+		ex.logger.Info("End")
 		if err := ex.db.Close(); err != nil {
 			rerr = err
 		}
 	}()
 
-	ex.logger.Info("before operations")
-	if err := ex.check(ctx); err != nil {
+	if _, err := ex.selectContext(ctx, cond); err != nil {
 		return err
 	}
 
-	ex.logger.Info("before commit")
 	tx := ex.db.MustBeginTx(ctx, nil)
-	if err := ex.exec(ctx, cond, tx); err != nil {
+	if _, err := ex.updateContext(ctx, tx, cond); err != nil {
 		return err
 	}
 
-	ex.logger.Info("after commit")
-	return ex.check(ctx)
+	if _, err := ex.selectTxContext(ctx, tx, cond); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	if _, err := ex.selectContext(ctx, cond); err != nil {
+		return err
+	}
+	return nil
 }
 
 func newExecutor(ctx context.Context, conf *Conf) (*executor, error) {
@@ -120,40 +133,57 @@ func newExecutor(ctx context.Context, conf *Conf) (*executor, error) {
 	}, nil
 }
 
-func (ex *executor) check(ctx context.Context) error {
-	users := []User{}
-	if err := ex.db.SelectContext(ctx, &users, querySelect); err != nil {
-		return err
+func (ex *executor) selectContext(ctx context.Context, cond *Cond) ([]User, error) {
+	args := map[string]any{"id": cond.id}
+	rows, err := ex.db.NamedQueryContext(ctx, querySelect, args)
+	if err != nil {
+		return nil, err
 	}
 
-	for _, u := range users {
+	users := []User{}
+	for rows.Next() {
+		var u User
+		if err := rows.StructScan(&u); err != nil {
+			return nil, err
+		}
+		users = append(users, u)
 		fmt.Println(u)
 	}
 
-	return nil
+	return users, nil
 }
 
-func (ex *executor) exec(ctx context.Context, cond *Cond, tx *sqlx.Tx) (rerr error) {
-	args := map[string]any{"id": cond.id, "status": cond.status}
-
-	_, err := tx.NamedExecContext(ctx, queryUpdate, args)
+func (ex *executor) updateContext(ctx context.Context, tx *sqlx.Tx, cond *Cond) (int64, error) {
+	args := map[string]any{"id": cond.id, "status": cond.afterSts}
+	result, err := tx.NamedExecContext(ctx, queryUpdate, args)
 	if err != nil {
-		return multierr.Append(err, tx.Rollback())
+		return 0, multierr.Append(err, tx.Rollback())
+	}
+
+	num, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return num, nil
+}
+
+func (ex *executor) selectTxContext(ctx context.Context, tx *sqlx.Tx, cond *Cond) ([]User, error) {
+	args := map[string]any{"id": cond.id}
+	rows, err := sqlx.NamedQueryContext(ctx, tx, querySelect, args)
+	if err != nil {
+		return nil, err
 	}
 
 	users := []User{}
-	err = tx.SelectContext(ctx, &users, querySelect)
-	if err != nil {
-		return err
-	}
-
-	for _, u := range users {
+	for rows.Next() {
+		var u User
+		if err := rows.StructScan(&u); err != nil {
+			return nil, multierr.Append(err, tx.Rollback())
+		}
+		users = append(users, u)
 		fmt.Println(u)
 	}
 
-	if err := tx.Commit(); err != nil {
-		return multierr.Append(rerr, err)
-	}
-
-	return nil
+	return users, nil
 }

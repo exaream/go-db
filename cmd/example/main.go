@@ -14,13 +14,14 @@ const version = "v0.2.0"
 
 // Arguments
 var (
-	app     = kingpin.New("example", "An example command made of Go to operate MySQL.")
-	typ     = app.Flag("type", "Set a config type.").Default("ini").String()
-	path    = app.Flag("path", "Set a config file path.").Default("example.dsn").String()
-	section = app.Flag("section", "Set a config section name.").Default("example_section").String()
-	timeout = app.Flag("timeout", "Set a timeout value. e.g. 5s").Default("10s").Duration()
-	id      = app.Flag("id", "Set an ID.").Int()
-	status  = app.Flag("status", "Set a status.").Int()
+	app       = kingpin.New("example", "An example command made of Go to operate MySQL.")
+	typ       = app.Flag("type", "Set a config type.").Default("ini").String()
+	path      = app.Flag("path", "Set a config file path.").Default("example.dsn").String()
+	section   = app.Flag("section", "Set a config section name.").Default("example_section").String()
+	timeout   = app.Flag("timeout", "Set a timeout value. e.g. 5s").Default("10s").Duration()
+	id        = app.Flag("id", "Set an ID.").Required().Int()
+	beforeSts = app.Flag("beforeSts", "Set a before status.").Required().Int()
+	afterSts  = app.Flag("afterSts", "Set a after status.").Required().Int()
 )
 
 func init() {
@@ -38,7 +39,7 @@ func main() {
 	defer cancel()
 
 	conf := example.NewConf(*typ, *path, *section)
-	cond := example.NewCond(*id, *status)
+	cond := example.NewCond(*id, *beforeSts, *afterSts)
 
 	if errs := example.Run(ctx, conf, cond); errs != nil {
 		for _, err := range multierr.Errors(errs) {

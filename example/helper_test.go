@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/exaream/go-db/dbutil"
-	ex "github.com/exaream/go-db/example"
+	"github.com/exaream/go-db/example"
+	gimei "github.com/mattn/go-gimei"
 	"go.uber.org/multierr"
 )
 
@@ -59,13 +60,11 @@ func initTableContext(ctx context.Context, conf *dbutil.Conf) (err error) {
 }
 
 // testUsers returns user data for testing.
-func testUsers() []ex.User {
-	var users []ex.User
-	names := map[int]string{1: "Alice", 2: "Bobby", 3: "Chris", 4: "Daisy", 5: "Elise"}
+func testUsers() (users []example.User) {
 	now := time.Now()
 
-	for i := 1; i <= len(names); i++ {
-		users = append(users, ex.User{i, names[i], "example" + strconv.Itoa(i) + "@examle.com", 0, &now, &now})
+	for i := 1; i <= 10; i++ {
+		users = append(users, example.User{i, gimei.NewName().Kanji(), "a" + strconv.Itoa(i) + "@examle.com", 0, &now, &now})
 	}
 
 	return users

@@ -41,8 +41,8 @@ type Cond struct {
 	afterSts  int
 }
 
-// Conf has configurations to create DB handle.
-type Conf struct {
+// Config has configurations to create DB handle.
+type Config struct {
 	typ     string
 	path    string
 	section string
@@ -53,9 +53,9 @@ type executor struct {
 	logger *zap.Logger
 }
 
-// NewConf returns configurations to create DB handle.
-func NewConf(typ, path, section string) *Conf {
-	return &Conf{
+// NewConfig returns configurations to create DB handle.
+func NewConfig(typ, path, section string) *Config {
+	return &Config{
 		typ:     typ,
 		path:    path,
 		section: section,
@@ -72,9 +72,9 @@ func NewCond(id, beforeSts, afterSts int) *Cond {
 }
 
 // Run does a DB operation.
-func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
+func Run(ctx context.Context, cfg *Config, cond *Cond) (rerr error) {
 	var ex *executor
-	ex, err := newExecutor(ctx, conf)
+	ex, err := newExecutor(ctx, cfg)
 	if err != nil {
 		return err
 	}
@@ -110,18 +110,18 @@ func Run(ctx context.Context, conf *Conf, cond *Cond) (rerr error) {
 	return nil
 }
 
-func newExecutor(ctx context.Context, conf *Conf) (*executor, error) {
+func newExecutor(ctx context.Context, cfg *Config) (*executor, error) {
 	logger, err := zap.NewDevelopment() // TODO: zap options
 	if err != nil {
 		return nil, err
 	}
 
-	dbConf, err := dbutil.ParseConf(conf.typ, conf.path, conf.section)
+	dbCfg, err := dbutil.ParseConfig(cfg.typ, cfg.path, cfg.section)
 	if err != nil {
 		return nil, err
 	}
 
-	db, err := dbutil.OpenWithContext(ctx, dbConf)
+	db, err := dbutil.OpenContext(ctx, dbCfg)
 	if err != nil {
 		return nil, err
 	}

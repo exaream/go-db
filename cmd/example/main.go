@@ -38,10 +38,10 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 	defer cancel()
 
-	conf := example.NewConf(*typ, *path, *section)
+	cfg := example.NewConfig(*typ, *path, *section)
 	cond := example.NewCond(*id, *beforeSts, *afterSts)
 
-	if errs := example.Run(ctx, conf, cond); errs != nil {
+	if errs := example.Run(ctx, cfg, cond); errs != nil {
 		for _, err := range multierr.Errors(errs) {
 			fmt.Fprintln(os.Stderr, err)
 		}

@@ -27,11 +27,11 @@ const (
 	    VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 )
 
-// initTableContext initializes table(s) for testing.
+// initTblContext initializes table(s) for testing.
 // You can also use the following SQL to initialize the testing DB.
 // /go/src/work/_local/mysql/setup/ddl/example_db.sql
-func initTableContext(ctx context.Context, conf *dbutil.Conf) (err error) {
-	db, err := dbutil.OpenWithContext(ctx, conf)
+func initTblContext(ctx context.Context, cfg *dbutil.Config) (err error) {
+	db, err := dbutil.OpenContext(ctx, cfg)
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,12 @@ func initTableContext(ctx context.Context, conf *dbutil.Conf) (err error) {
 		return multierr.Append(err, tx.Rollback())
 	}
 
+	// Bulk insert
 	if _, err := tx.NamedExecContext(ctx, queryInsert, testUsers()); err != nil {
+		return multierr.Append(err, tx.Rollback())
+	}
+
+	if err := tx.Commit(); err != nil {
 		return multierr.Append(err, tx.Rollback())
 	}
 

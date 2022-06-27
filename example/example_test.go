@@ -8,21 +8,24 @@ import (
 	"testing"
 
 	"github.com/exaream/go-db/dbutil"
+	"go.uber.org/multierr"
 )
 
 const (
-	confTyp     = "ini"
-	confSection = "example_section"
+	cfgTyp     = "ini"
+	cfgSection = "example_section"
 )
 
-var confPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "cmd", "example", "example.dsn")
+var cfgPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "cmd", "example", "example.dsn")
 
 // TODO: How to call a helper func in TestMain which does NOT have testing.T.
 func TestMain(m *testing.M) {
 	ctx := context.Context(context.Background())
 
-	if err := setup(ctx); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	if errs := setup(ctx); errs != nil {
+		for _, err := range multierr.Errors(errs) {
+			fmt.Fprintln(os.Stderr, err)
+		}
 		os.Exit(1)
 	}
 
@@ -32,12 +35,12 @@ func TestMain(m *testing.M) {
 }
 
 func setup(ctx context.Context) error {
-	conf, err := dbutil.ParseConf(confTyp, confPath, confSection)
+	cfg, err := dbutil.ParseConfig(cfgTyp, cfgPath, cfgSection)
 	if err != nil {
 		return err
 	}
 
-	if err := initTableContext(ctx, conf); err != nil {
+	if err := initTblContext(ctx, cfg); err != nil {
 		return err
 	}
 

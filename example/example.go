@@ -14,6 +14,8 @@ import (
 )
 
 const (
+	// Layout of "Y-m-d H:i:s"
+	YmdHis = "2006-01-02 15:04:05"
 	// SQL
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id;`
 	queryUpdate = `UPDATE users SET status = :status, updated_at = NOW() WHERE id = :id;`
@@ -31,7 +33,7 @@ type User struct {
 
 // User's stringer
 func (u User) String() string {
-	return fmt.Sprintf("%d\t%s\t%v\t%s\t%s", u.ID, u.Name, u.Status, u.CreatedAt.Format(dbutil.YmdHis), u.UpdatedAt.Format(dbutil.YmdHis))
+	return fmt.Sprintf("%d\t%s\t%v\t%s\t%s", u.ID, u.Name, u.Status, u.CreatedAt.Format(YmdHis), u.UpdatedAt.Format(YmdHis))
 }
 
 // Cond has conditions to create SQL.

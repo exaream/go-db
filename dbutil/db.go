@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/url"
-	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
@@ -24,7 +23,7 @@ type Config struct {
 	Password string
 	Protocol string
 	Tz       string
-	Port     int
+	Port     uint16 // 1~65535
 }
 
 // ParseConfig returns DB config by a config file.
@@ -58,14 +57,14 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 
 // OpenContext returns DB handle.
 func OpenContext(ctx context.Context, cfg *Config) (*sqlx.DB, error) {
-	dataSourceName := fmt.Sprintf("%s:%s@%s(%s:%s)/%s",
-		cfg.Username, cfg.Password, cfg.Protocol, cfg.Host, strconv.Itoa(cfg.Port), cfg.Database)
+	dsn := fmt.Sprintf("%s:%s@%s(%s:%d)/%s",
+		cfg.Username, cfg.Password, cfg.Protocol, cfg.Host, cfg.Port, cfg.Database)
 
 	params := url.Values{"parseTime": {"true"}, "loc": {cfg.Tz},
 		// See: http://dsas.blog.klab.org/archives/52191467.html
 		"interpolateParams": {"true"}, "collation": {"utf8mb4_bin"}}
 
-	db, err := sqlx.Open("mysql", dataSourceName+"?"+params.Encode())
+	db, err := sqlx.Open("mysql", dsn+"?"+params.Encode())
 	if err != nil {
 		return nil, err
 	}

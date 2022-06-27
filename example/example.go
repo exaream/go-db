@@ -21,10 +21,10 @@ const (
 
 // Struct of users table
 type User struct {
-	ID        int        `db:"id"`
+	ID        uint64     `db:"id"`
 	Name      string     `db:"name"`
 	Email     string     `db:"email"`
-	Status    int        `db:"status"`
+	Status    uint8      `db:"status"`
 	CreatedAt *time.Time `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
 }
@@ -36,9 +36,9 @@ func (u User) String() string {
 
 // Cond has conditions to create SQL.
 type Cond struct {
-	id        int
-	beforeSts int
-	afterSts  int
+	id        uint64
+	beforeSts uint8
+	afterSts  uint8
 }
 
 // Config has configurations to create DB handle.
@@ -63,7 +63,7 @@ func NewConfig(typ, path, section string) *Config {
 }
 
 // NewCond returns conditions to create SQL.
-func NewCond(id, beforeSts, afterSts int) *Cond {
+func NewCond(id uint64, beforeSts, afterSts uint8) *Cond {
 	return &Cond{
 		id:        id,
 		beforeSts: beforeSts,

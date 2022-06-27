@@ -3,6 +3,7 @@ module github.com/exaream/go-db
 go 1.18
 
 require (
+	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/mattn/go-gimei v0.0.1

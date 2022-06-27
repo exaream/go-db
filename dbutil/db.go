@@ -17,7 +17,7 @@ const (
 )
 
 // DB config
-type Conf struct {
+type Config struct {
 	Host     string
 	Database string
 	Username string
@@ -27,8 +27,8 @@ type Conf struct {
 	Port     int
 }
 
-// ParseConf returns DB config by a config file.
-func ParseConf(typ, path, section string) (*Conf, error) {
+// ParseConfig returns DB config by a config file.
+func ParseConfig(typ, path, section string) (*Config, error) {
 	v := viper.New()
 	v.SetConfigType(typ)
 	v.SetConfigFile(path)
@@ -38,32 +38,34 @@ func ParseConf(typ, path, section string) (*Conf, error) {
 	}
 
 	sub := v.Sub(section)
-	var conf *Conf
-	if err := sub.Unmarshal(&conf); err != nil {
+	var cfg *Config
+	if err := sub.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
 
-	password, err := base64.StdEncoding.DecodeString(conf.Password)
+	password, err := base64.StdEncoding.DecodeString(cfg.Password)
 	if err != nil {
 		return nil, err
 	}
-	conf.Password = string(password)
+	cfg.Password = string(password)
 
-	if conf.Tz == "" {
-		conf.Tz = Tz
+	if cfg.Tz == "" {
+		cfg.Tz = Tz
 	}
 
-	return conf, nil
+	return cfg, nil
 }
 
-// OpenWithContext returns DB handle.
-func OpenWithContext(ctx context.Context, conf *Conf) (*sqlx.DB, error) {
-	srcName := fmt.Sprintf("%s:%s@%s(%s:%s)/%s",
-		conf.Username, conf.Password, conf.Protocol, conf.Host, strconv.Itoa(conf.Port), conf.Database)
+// OpenContext returns DB handle.
+func OpenContext(ctx context.Context, cfg *Config) (*sqlx.DB, error) {
+	dataSourceName := fmt.Sprintf("%s:%s@%s(%s:%s)/%s",
+		cfg.Username, cfg.Password, cfg.Protocol, cfg.Host, strconv.Itoa(cfg.Port), cfg.Database)
 
-	params := url.Values{"parseTime": {"true"}, "loc": {conf.Tz}}
+	params := url.Values{"parseTime": {"true"}, "loc": {cfg.Tz},
+		// See: http://dsas.blog.klab.org/archives/52191467.html
+		"interpolateParams": {"true"}, "collation": {"utf8mb4_bin"}}
 
-	db, err := sqlx.Open("mysql", srcName+"?"+params.Encode())
+	db, err := sqlx.Open("mysql", dataSourceName+"?"+params.Encode())
 	if err != nil {
 		return nil, err
 	}

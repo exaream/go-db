@@ -19,9 +19,9 @@ var (
 	path      = app.Flag("path", "Set a config file path.").Default("example.dsn").String()
 	section   = app.Flag("section", "Set a config section name.").Default("example_section").String()
 	timeout   = app.Flag("timeout", "Set a timeout value. e.g. 5s").Default("10s").Duration()
-	id        = app.Flag("id", "Set an ID.").Required().Int()
-	beforeSts = app.Flag("beforeSts", "Set a before status.").Required().Int()
-	afterSts  = app.Flag("afterSts", "Set a after status.").Required().Int()
+	id        = app.Flag("id", "Set an ID.").Required().Uint64()
+	beforeSts = app.Flag("beforeSts", "Set a before status.").Required().Uint8()
+	afterSts  = app.Flag("afterSts", "Set a after status.").Required().Uint8()
 )
 
 func init() {

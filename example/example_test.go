@@ -12,8 +12,10 @@ import (
 )
 
 const (
-	cfgTyp     = "ini"
-	cfgSection = "example_section"
+	cfgTyp      = "ini"
+	cfgSection  = "example_section"
+	testDataNum = 50000
+	chunkSize   = 10000
 )
 
 var cfgPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "cmd", "example", "example.dsn")
@@ -40,7 +42,7 @@ func setup(ctx context.Context) error {
 		return err
 	}
 
-	if err := initTblContext(ctx, cfg); err != nil {
+	if err := initTblContext(ctx, cfg, testDataNum, chunkSize); err != nil {
 		return err
 	}
 

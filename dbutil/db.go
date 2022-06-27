@@ -10,10 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	Tz     = "Asia/Tokyo"          // Timezone
-	YmdHis = "2006-01-02 15:04:05" // Layout of "Y-m-d H:i:s"
-)
+const Tz = "Asia/Tokyo" // Timezone
 
 // DB config
 type Config struct {

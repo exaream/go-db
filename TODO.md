@@ -1,3 +1,4 @@
 - [x] Parse DB config by config path (to reduce arguments)
 - [x] Support `.dsn` file
-- [ ] Devide `Run()` into some methods
+- [x] Devide `Run()` into some methods
+- [ ] Unit tests

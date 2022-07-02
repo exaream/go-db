@@ -2,6 +2,7 @@ package example
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -14,14 +15,16 @@ import (
 )
 
 const (
+	opsName = "User Status Change"
 	// Layout of "Y-m-d H:i:s"
 	YmdHis = "2006-01-02 15:04:05"
 	// SQL
-	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id;`
-	queryUpdate = `UPDATE users SET status = :status, updated_at = NOW() WHERE id = :id;`
+	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
+	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
 )
 
-// Struct of users table
+// Schema of users table
+// Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
 type User struct {
 	ID        uint64     `db:"id"`
 	Name      string     `db:"name"`
@@ -31,7 +34,7 @@ type User struct {
 	UpdatedAt *time.Time `db:"updated_at"`
 }
 
-// User's stringer
+// User's stringer.
 func (u User) String() string {
 	return fmt.Sprintf("%d\t%s\t%v\t%s\t%s", u.ID, u.Name, u.Status, u.CreatedAt.Format(YmdHis), u.UpdatedAt.Format(YmdHis))
 }
@@ -41,27 +44,6 @@ type Cond struct {
 	id        uint64
 	beforeSts uint8
 	afterSts  uint8
-}
-
-// Config has configurations to create DB handle.
-type Config struct {
-	typ     string
-	path    string
-	section string
-}
-
-type executor struct {
-	db     *sqlx.DB
-	logger *zap.Logger
-}
-
-// NewConfig returns configurations to create DB handle.
-func NewConfig(typ, path, section string) *Config {
-	return &Config{
-		typ:     typ,
-		path:    path,
-		section: section,
-	}
 }
 
 // NewCond returns conditions to create SQL.
@@ -74,56 +56,45 @@ func NewCond(id uint64, beforeSts, afterSts uint8) *Cond {
 }
 
 // Run does a DB operation.
-func Run(ctx context.Context, cfg *Config, cond *Cond) (rerr error) {
-	var ex *executor
+func Run(ctx context.Context, cfg *dbutil.ConfigFile, cond *Cond) (rerr error) {
 	ex, err := newExecutor(ctx, cfg)
 	if err != nil {
 		return err
 	}
 
-	ex.logger.Info("Start")
 	defer func() {
 		if err := ex.db.Close(); err != nil {
 			rerr = err
 		}
-		ex.logger.Info("End")
 	}()
 
-	if _, err := ex.selectContext(ctx, cond); err != nil {
+	if err := ex.prepare(ctx, cond); err != nil {
 		return err
 	}
 
-	tx := ex.db.MustBeginTx(ctx, nil)
-	if _, err := ex.updateTxContext(ctx, tx, cond); err != nil {
+	if err := ex.exec(ctx, cond); err != nil {
 		return err
 	}
 
-	if _, err := ex.selectTxContext(ctx, tx, cond); err != nil {
+	if err := ex.teardown(ctx, cond); err != nil {
 		return err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	if _, err := ex.selectContext(ctx, cond); err != nil {
-		return err
-	}
 	return nil
 }
 
-func newExecutor(ctx context.Context, cfg *Config) (*executor, error) {
-	logger, err := zap.NewDevelopment() // TODO: zap options
+type executor struct {
+	logger *zap.Logger
+	db     *sqlx.DB
+}
+
+func newExecutor(ctx context.Context, cfg *dbutil.ConfigFile) (*executor, error) {
+	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	dbCfg, err := dbutil.ParseConfig(cfg.typ, cfg.path, cfg.section)
-	if err != nil {
-		return nil, err
-	}
-
-	db, err := dbutil.OpenContext(ctx, dbCfg)
+	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return nil, err
 	}
@@ -134,57 +105,60 @@ func newExecutor(ctx context.Context, cfg *Config) (*executor, error) {
 	}, nil
 }
 
-func (ex *executor) selectContext(ctx context.Context, cond *Cond) ([]User, error) {
-	args := map[string]any{"id": cond.id}
-	rows, err := ex.db.NamedQueryContext(ctx, querySelect, args)
+func (ex *executor) prepare(ctx context.Context, cond *Cond) error {
+	args := map[string]any{"id": cond.id, "status": cond.beforeSts}
+	rows, err := dbutil.SelectContext[User](ctx, ex.db, querySelect, args)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	users := []User{}
-	for rows.Next() {
-		var u User
-		if err := rows.StructScan(&u); err != nil {
-			return nil, err
-		}
-		users = append(users, u)
-		fmt.Println(u)
+	if len(rows) <= 0 {
+		return errors.New("there is no target rows")
 	}
 
-	return users, nil
+	return nil
 }
 
-func (ex *executor) updateTxContext(ctx context.Context, tx *sqlx.Tx, cond *Cond) (int64, error) {
+func (ex *executor) exec(ctx context.Context, cond *Cond) error {
+	tx := ex.db.MustBeginTx(ctx, nil)
+
+	args := map[string]any{"id": cond.id, "beforeSts": cond.beforeSts, "afterSts": cond.afterSts}
+	num, err := dbutil.UpdateTxContext(ctx, tx, queryUpdate, args)
+	if err != nil {
+		return err
+	}
+
+	if num <= 0 {
+		return multierr.Append(errors.New("there is no affected rows"), tx.Rollback())
+	}
+
+	args = map[string]any{"id": cond.id, "status": cond.afterSts}
+	rows, err := dbutil.SelectTxContext[User](ctx, tx, querySelect, args)
+	if err != nil {
+		return err
+	}
+
+	if len(rows) <= 0 {
+		return multierr.Append(errors.New("there is no target rows"), tx.Rollback())
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ex *executor) teardown(ctx context.Context, cond *Cond) error {
 	args := map[string]any{"id": cond.id, "status": cond.afterSts}
-	result, err := tx.NamedExecContext(ctx, queryUpdate, args)
+	rows, err := dbutil.SelectContext[User](ctx, ex.db, querySelect, args)
 	if err != nil {
-		return 0, multierr.Append(err, tx.Rollback())
+		return err
 	}
 
-	num, err := result.RowsAffected()
-	if err != nil {
-		return 0, err
+	if len(rows) <= 0 {
+		return errors.New("there is no affected rows")
 	}
 
-	return num, nil
-}
-
-func (ex *executor) selectTxContext(ctx context.Context, tx *sqlx.Tx, cond *Cond) ([]User, error) {
-	args := map[string]any{"id": cond.id}
-	rows, err := sqlx.NamedQueryContext(ctx, tx, querySelect, args)
-	if err != nil {
-		return nil, err
-	}
-
-	users := []User{}
-	for rows.Next() {
-		var u User
-		if err := rows.StructScan(&u); err != nil {
-			return nil, multierr.Append(err, tx.Rollback())
-		}
-		users = append(users, u)
-		fmt.Println(u)
-	}
-
-	return users, nil
+	return nil
 }

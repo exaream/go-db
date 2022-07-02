@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/exaream/go-db/dbutil"
 	"github.com/exaream/go-db/example"
 	"go.uber.org/multierr"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -37,8 +38,7 @@ func init() {
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 	defer cancel()
-
-	cfg := example.NewConfig(*typ, *path, *section)
+	cfg := dbutil.NewConfigFile(*typ, *path, *section)
 	cond := example.NewCond(*id, *beforeSts, *afterSts)
 
 	if errs := example.Run(ctx, cfg, cond); errs != nil {

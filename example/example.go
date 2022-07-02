@@ -15,7 +15,6 @@ import (
 )
 
 const (
-	opsName = "User Status Change"
 	// Layout of "Y-m-d H:i:s"
 	YmdHis = "2006-01-02 15:04:05"
 	// SQL

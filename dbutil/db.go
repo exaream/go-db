@@ -86,12 +86,12 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 }
 
 // OpenContext returns DB handle.
+// See: http://dsas.blog.klab.org/archives/52191467.html
 func OpenContext(ctx context.Context, cfg *Config) (*sqlx.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@%s(%s:%d)/%s",
 		cfg.Username, cfg.Password, cfg.Protocol, cfg.Host, cfg.Port, cfg.Database)
 
 	params := url.Values{"parseTime": {"true"}, "loc": {cfg.Tz},
-		// See: http://dsas.blog.klab.org/archives/52191467.html
 		"interpolateParams": {"true"}, "collation": {"utf8mb4_bin"}}
 
 	db, err := sqlx.Open("mysql", dsn+"?"+params.Encode())

@@ -43,8 +43,8 @@ services:
 networks:
   # Prevent generating "default" network automatically
   default:
-    external:
-      name: bridge
+    external: true
+    name: bridge
   # Network segment of inter-container communication
   container-link:
     name: go_db_network

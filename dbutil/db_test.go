@@ -8,9 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"go.uber.org/multierr"
-
 	"github.com/exaream/go-db/dbutil"
+	"go.uber.org/multierr"
 )
 
 const (
@@ -55,6 +54,13 @@ func TestMain(m *testing.M) {
 	}
 
 	code := m.Run()
+
+	if errs := setup(ctx); errs != nil {
+		for _, err := range multierr.Errors(errs) {
+			fmt.Fprintln(os.Stderr, err)
+		}
+		os.Exit(1)
+	}
 
 	os.Exit(code)
 }

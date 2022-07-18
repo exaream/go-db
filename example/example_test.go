@@ -2,6 +2,7 @@ package example_test
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -18,23 +19,29 @@ const (
 
 var cfgPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example", "example.dsn")
 
+func TestMain(m *testing.M) {
+	time.Sleep(1)
+	code := m.Run()
+	os.Exit(code)
+}
+
 func TestRun(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
 	cond := example.NewCond(1, 0, 1)
-
 	if errs := example.Run(ctx, cfg, cond); errs != nil {
 		for _, err := range multierr.Errors(errs) {
 			t.Error(err)
 		}
 	}
 
+	// Revert
 	cond = example.NewCond(1, 1, 0)
 	if errs := example.Run(ctx, cfg, cond); errs != nil {
 		for _, err := range multierr.Errors(errs) {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	}
 }
@@ -67,7 +74,7 @@ func TestPrepare(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := ex.ExportPrepare(ctx, cond); err != nil {
+	if err := example.ExportPrepare(ex, ctx, cond); err != nil {
 		t.Error(err)
 	}
 }
@@ -84,7 +91,7 @@ func TestExec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := ex.ExportExec(ctx, cond); err != nil {
+	if err := example.ExportExec(ex, ctx, cond); err != nil {
 		t.Error(err)
 	}
 }
@@ -101,7 +108,14 @@ func TestTeardown(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := ex.ExportTeardown(ctx, cond); err != nil {
+	if err := example.ExportTeardown(ex, ctx, cond); err != nil {
 		t.Error(err)
+	}
+
+	cond = example.NewCond(1, 1, 0)
+	if errs := example.Run(ctx, cfg, cond); errs != nil {
+		for _, err := range multierr.Errors(errs) {
+			t.Fatal(err)
+		}
 	}
 }

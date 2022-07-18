@@ -2,5 +2,6 @@
 - [x] Support `.dsn` file
 - [x] Devide `Run()` into some methods
 - [x] Add example_test DB
-- [ ] Unit tests
+- [x] Unit tests
+- [ ] Fix unit tests' concurrency
 - [ ] Add docker user

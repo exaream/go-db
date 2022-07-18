@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS `example_db`.`users`;
+DROP TABLE IF EXISTS `users`;
 
-CREATE TABLE `example_db`.`users` (
+CREATE TABLE `users` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE `example_db`.`users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO `example_db`.`users` (`id`, `name`, `email`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `users` (`id`, `name`, `email`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'Alice', 'example1@example.com', 0, NOW(), NOW()),
 (2, 'Billy', 'example2@example.com', 0, NOW(), NOW()),
 (3, 'Chris', 'example3@example.com', 0, NOW(), NOW()),

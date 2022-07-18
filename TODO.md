@@ -1,4 +1,6 @@
 - [x] Parse DB config by config path (to reduce arguments)
 - [x] Support `.dsn` file
 - [x] Devide `Run()` into some methods
+- [x] Add example_test DB
 - [ ] Unit tests
+- [ ] Add docker user

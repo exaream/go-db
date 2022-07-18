@@ -2,7 +2,7 @@
 ; Never use the following in your production env.
 [example_section]
 host     = go_db_mysql
-database = example
+database = example_test
 username = exampleuser
 password = "ZXhhbXBsZXBhc3N3ZA==" ; base64-encoded value of "examplepasswd"
 protocol = tcp

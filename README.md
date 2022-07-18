@@ -9,6 +9,14 @@ $ docker-compose up --build -d
 $ docker container exec -it go_db_app bash
 ```
 
+## Test
+- Set the `-p` option to 1 so that the test is run in single process.
+- Due to conflicts when updating DB by multiple packages.
+```shell
+# cd /go/src/work/
+# go test ./... -count=1 -p=1
+```
+
 ### Usage
 Help
 ```shell

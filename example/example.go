@@ -16,7 +16,7 @@ import (
 
 const (
 	// Layout of "Y-m-d H:i:s"
-	YmdHis = "2006-01-02 15:04:05"
+	layout = "2006-01-02 15:04:05"
 	// SQL
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
@@ -35,7 +35,7 @@ type User struct {
 
 // User's stringer.
 func (u User) String() string {
-	return fmt.Sprintf("%d\t%s\t%v\t%s\t%s", u.ID, u.Name, u.Status, u.CreatedAt.Format(YmdHis), u.UpdatedAt.Format(YmdHis))
+	return fmt.Sprintf("%d\t%s\t%v\t%s\t%s", u.ID, u.Name, u.Status, u.CreatedAt.Format(layout), u.UpdatedAt.Format(layout))
 }
 
 // Cond has conditions to create SQL.
@@ -56,13 +56,13 @@ func NewCond(id uint64, beforeSts, afterSts uint8) *Cond {
 
 // Run does a DB operation.
 func Run(ctx context.Context, cfg *dbutil.ConfigFile, cond *Cond) (rerr error) {
-	ex, err := newExecutor(ctx, cfg)
+	ex, err := NewExecutor(ctx, cfg)
 	if err != nil {
 		return err
 	}
 
 	defer func() {
-		if err := ex.db.Close(); err != nil {
+		if err := ex.DB.Close(); err != nil {
 			rerr = err
 		}
 	}()
@@ -82,31 +82,31 @@ func Run(ctx context.Context, cfg *dbutil.ConfigFile, cond *Cond) (rerr error) {
 	return nil
 }
 
-type executor struct {
-	logger *zap.Logger
-	db     *sqlx.DB
+type Executor struct {
+	Logger *zap.Logger
+	DB     *sqlx.DB
 }
 
-func newExecutor(ctx context.Context, cfg *dbutil.ConfigFile) (*executor, error) {
+func NewExecutor(ctx context.Context, cfg *dbutil.ConfigFile) (*Executor, error) {
 	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	logger, err := zap.NewDevelopment()
+	Logger, err := zap.NewDevelopment()
 	if err != nil {
 		return nil, err
 	}
 
-	return &executor{
-		logger: logger,
-		db:     db,
+	return &Executor{
+		Logger: Logger,
+		DB:     db,
 	}, nil
 }
 
-func (ex *executor) prepare(ctx context.Context, cond *Cond) error {
+func (ex *Executor) prepare(ctx context.Context, cond *Cond) error {
 	args := map[string]any{"id": cond.id, "status": cond.beforeSts}
-	rows, err := dbutil.SelectContext[User](ctx, ex.db, querySelect, args)
+	rows, err := dbutil.SelectContext[User](ctx, ex.DB, querySelect, args)
 	if err != nil {
 		return err
 	}
@@ -118,8 +118,8 @@ func (ex *executor) prepare(ctx context.Context, cond *Cond) error {
 	return nil
 }
 
-func (ex *executor) exec(ctx context.Context, cond *Cond) error {
-	tx := ex.db.MustBeginTx(ctx, nil)
+func (ex *Executor) exec(ctx context.Context, cond *Cond) error {
+	tx := ex.DB.MustBeginTx(ctx, nil)
 
 	args := map[string]any{"id": cond.id, "beforeSts": cond.beforeSts, "afterSts": cond.afterSts}
 	num, err := dbutil.UpdateTxContext(ctx, tx, queryUpdate, args)
@@ -148,9 +148,9 @@ func (ex *executor) exec(ctx context.Context, cond *Cond) error {
 	return nil
 }
 
-func (ex *executor) teardown(ctx context.Context, cond *Cond) error {
+func (ex *Executor) teardown(ctx context.Context, cond *Cond) error {
 	args := map[string]any{"id": cond.id, "status": cond.afterSts}
-	rows, err := dbutil.SelectContext[User](ctx, ex.db, querySelect, args)
+	rows, err := dbutil.SelectContext[User](ctx, ex.DB, querySelect, args)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package example_test
+package dbutil_test
 
 import (
 	"context"

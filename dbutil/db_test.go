@@ -2,12 +2,15 @@ package dbutil_test
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/exaream/go-db/dbutil"
 	"github.com/exaream/go-db/example"
+	"go.uber.org/multierr"
 )
 
 const (
@@ -18,23 +21,58 @@ const (
 	cfgUsername = "exampleuser"
 	cfgPassword = "examplepasswd"
 	cfgProtocol = "tcp"
+	driver      = "mysql"
 	cfgPort     = 3306
 	timeout     = 5
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
+
+	testDataNum = 10 // 50000
+	chunkSize   = 10 // 10000
 )
 
 var cfgPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example", "example.dsn")
+
+func TestMain(m *testing.M) {
+	ctx := context.Context(context.Background())
+
+	if errs := setup(ctx); errs != nil {
+		for _, err := range multierr.Errors(errs) {
+			fmt.Fprintln(os.Stderr, err)
+		}
+		os.Exit(1)
+	}
+
+	code := m.Run()
+
+	os.Exit(code)
+}
+
+func setup(ctx context.Context) error {
+	cfg, err := dbutil.ParseConfig(cfgTyp, cfgPath, cfgSection)
+	if err != nil {
+		return err
+	}
+
+	if err := initTblContext(ctx, cfg, testDataNum, chunkSize); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func TestNewDBContext(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
 	defer cancel()
 
-	f := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	db, err := dbutil.NewDBContext(ctx, f)
-
+	file := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
+	db, err := dbutil.NewDBContext(ctx, file)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
+	}
+
+	if got := db.DriverName(); got != driver {
+		t.Errorf("want: %s, got: %s", driver, got)
 	}
 
 	if err := db.PingContext(ctx); err != nil {
@@ -45,7 +83,7 @@ func TestNewDBContext(t *testing.T) {
 func TestParseConfig(t *testing.T) {
 	cfg, err := dbutil.ParseConfig(cfgTyp, cfgPath, cfgSection)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if cfg.Host != cfgHost {
@@ -74,12 +112,16 @@ func TestOpenContext(t *testing.T) {
 
 	cfg, err := dbutil.ParseConfig(cfgTyp, cfgPath, cfgSection)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	db, err := dbutil.OpenContext(ctx, cfg)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
+	}
+
+	if got := db.DriverName(); got != driver {
+		t.Errorf("want: %s, got: %s", driver, got)
 	}
 
 	if err := db.PingContext(ctx); err != nil {
@@ -90,20 +132,68 @@ func TestOpenContext(t *testing.T) {
 func TestSelectContext(t *testing.T) {
 	ctx := context.Background()
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
+
 	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
+
+	want := 1
 	args := map[string]any{"id": 1, "status": 0}
 	list, err := dbutil.SelectContext[example.User](ctx, db, querySelect, args)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if len(list) != 1 {
-		t.Errorf("want: 1, got: %d", len(list))
+	if len(list) != want {
+		t.Errorf("len(list) want: %d, got: %d", want, len(list))
 	}
-	if list[0].Status != 0 {
-		t.Errorf("want: 1, got: %d", list[0].Status)
+}
+
+func TestSelectTxContext(t *testing.T) {
+	ctx := context.Background()
+	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
+
+	ex, err := example.NewExecutor(ctx, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tx := ex.DB.MustBeginTx(ctx, nil)
+	defer tx.Rollback()
+
+	want := 1
+	args := map[string]any{"id": 1, "status": 0}
+	list, err := dbutil.SelectTxContext[example.User](ctx, tx, querySelect, args)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(list) != want {
+		t.Errorf("len(list) want: %d, got: %d", want, len(list))
+	}
+}
+
+func TestUpdateTxContext(t *testing.T) {
+	ctx := context.Background()
+	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
+
+	ex, err := example.NewExecutor(ctx, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tx := ex.DB.MustBeginTx(ctx, nil)
+	defer tx.Rollback()
+
+	var want int64 = 1
+	args := map[string]any{"id": 1, "beforeSts": 0, "afterSts": 1}
+	got, err := dbutil.UpdateTxContext(ctx, tx, queryUpdate, args)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if got != want {
+		t.Errorf("num want: %d, got: %d", want, got)
 	}
 }

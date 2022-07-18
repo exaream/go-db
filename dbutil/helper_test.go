@@ -6,7 +6,6 @@ import (
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/exaream/go-db/dbutil"
-	"github.com/exaream/go-db/example"
 	"github.com/jmoiron/sqlx"
 	"github.com/mattn/go-gimei"
 	"go.uber.org/multierr"
@@ -27,6 +26,19 @@ const (
 	queryInsert = `INSERT INTO users (id, name, email, status, created_at, updated_at) 
 	    VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 )
+
+func setup(ctx context.Context) error {
+	cfg, err := dbutil.ParseConfig(cfgTyp, cfgPath, cfgSection)
+	if err != nil {
+		return err
+	}
+
+	if err := initTblContext(ctx, cfg, testDataNum, chunkSize); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // initTblContext initializes a table for testing.
 func initTblContext(ctx context.Context, cfg *dbutil.Config, max, size uint64) (err error) {
@@ -80,11 +92,11 @@ func bulkInsertTxContext(ctx context.Context, tx *sqlx.Tx, max, size uint64) err
 }
 
 // testUsers returns user data for testing.
-func testUsers(min, max uint64) (users []example.User) {
+func testUsers(min, max uint64) (users []user) {
 	now := time.Now()
 	var i uint64
 	for i = min; i <= max; i++ {
-		users = append(users, example.User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
+		users = append(users, user{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
 	}
 
 	return users

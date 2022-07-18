@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/exaream/go-db/dbutil"
-	"github.com/exaream/go-db/example"
 	"go.uber.org/multierr"
+
+	"github.com/exaream/go-db/dbutil"
 )
 
 const (
@@ -33,6 +33,17 @@ const (
 
 var cfgPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example", "example.dsn")
 
+// Schema of users table
+// Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
+type user struct {
+	ID        uint64     `db:"id"`
+	Name      string     `db:"name"`
+	Email     string     `db:"email"`
+	Status    uint8      `db:"status"`
+	CreatedAt *time.Time `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+}
+
 func TestMain(m *testing.M) {
 	ctx := context.Context(context.Background())
 
@@ -46,19 +57,6 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	os.Exit(code)
-}
-
-func setup(ctx context.Context) error {
-	cfg, err := dbutil.ParseConfig(cfgTyp, cfgPath, cfgSection)
-	if err != nil {
-		return err
-	}
-
-	if err := initTblContext(ctx, cfg, testDataNum, chunkSize); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func TestNewDBContext(t *testing.T) {
@@ -140,7 +138,7 @@ func TestSelectContext(t *testing.T) {
 
 	want := 1
 	args := map[string]any{"id": 1, "status": 0}
-	list, err := dbutil.SelectContext[example.User](ctx, db, querySelect, args)
+	list, err := dbutil.SelectContext[user](ctx, db, querySelect, args)
 	if err != nil {
 		t.Error(err)
 	}
@@ -154,17 +152,17 @@ func TestSelectTxContext(t *testing.T) {
 	ctx := context.Background()
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
 
-	ex, err := example.NewExecutor(ctx, cfg)
+	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	tx := ex.DB.MustBeginTx(ctx, nil)
+	tx := db.MustBeginTx(ctx, nil)
 	defer tx.Rollback()
 
 	want := 1
 	args := map[string]any{"id": 1, "status": 0}
-	list, err := dbutil.SelectTxContext[example.User](ctx, tx, querySelect, args)
+	list, err := dbutil.SelectTxContext[user](ctx, tx, querySelect, args)
 	if err != nil {
 		t.Error(err)
 	}
@@ -178,12 +176,12 @@ func TestUpdateTxContext(t *testing.T) {
 	ctx := context.Background()
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
 
-	ex, err := example.NewExecutor(ctx, cfg)
+	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	tx := ex.DB.MustBeginTx(ctx, nil)
+	tx := db.MustBeginTx(ctx, nil)
 	defer tx.Rollback()
 
 	var want int64 = 1

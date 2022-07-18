@@ -2,8 +2,6 @@ package example_test
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -12,19 +10,12 @@ import (
 	"go.uber.org/multierr"
 )
 
-const (
-	cfgTyp     = "ini"
-	cfgSection = "example_section"
-)
-
-var cfgPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example", "example.dsn")
-
-func TestMain(m *testing.M) {
-	code := m.Run()
-	os.Exit(code)
-}
-
 func TestRun(t *testing.T) {
+	prepareDB(t, beforeSqlPath)
+	t.Cleanup(func() {
+		prepareDB(t, beforeSqlPath)
+	})
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -35,17 +26,11 @@ func TestRun(t *testing.T) {
 			t.Error(err)
 		}
 	}
-
-	// Revert
-	cond = example.NewCond(1, 1, 0)
-	if errs := example.Run(ctx, cfg, cond); errs != nil {
-		for _, err := range multierr.Errors(errs) {
-			t.Fatal(err)
-		}
-	}
 }
 
 func TestNewExecutor(t *testing.T) {
+	prepareDB(t, beforeSqlPath)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -62,6 +47,8 @@ func TestNewExecutor(t *testing.T) {
 }
 
 func TestPrepare(t *testing.T) {
+	prepareDB(t, beforeSqlPath)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -79,6 +66,11 @@ func TestPrepare(t *testing.T) {
 }
 
 func TestExec(t *testing.T) {
+	prepareDB(t, beforeSqlPath)
+	t.Cleanup(func() {
+		prepareDB(t, beforeSqlPath)
+	})
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -96,6 +88,11 @@ func TestExec(t *testing.T) {
 }
 
 func TestTeardown(t *testing.T) {
+	prepareDB(t, afterSqlPath)
+	t.Cleanup(func() {
+		prepareDB(t, beforeSqlPath)
+	})
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -109,12 +106,5 @@ func TestTeardown(t *testing.T) {
 
 	if err := example.ExportTeardown(ex, ctx, cond); err != nil {
 		t.Error(err)
-	}
-
-	cond = example.NewCond(1, 1, 0)
-	if errs := example.Run(ctx, cfg, cond); errs != nil {
-		for _, err := range multierr.Errors(errs) {
-			t.Fatal(err)
-		}
 	}
 }

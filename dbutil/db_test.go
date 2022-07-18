@@ -2,8 +2,6 @@ package dbutil_test
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -28,8 +26,6 @@ const (
 	chunkSize   = 10 // 10000
 )
 
-var cfgPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example", "example.dsn")
-
 // Schema of users table
 // Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
 type user struct {
@@ -39,20 +35,6 @@ type user struct {
 	Status    uint8      `db:"status"`
 	CreatedAt *time.Time `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
-}
-
-func TestMain(m *testing.M) {
-	//ctx := context.Context(context.Background())
-	// if errs := setup(ctx); errs != nil {
-	// 	for _, err := range multierr.Errors(errs) {
-	// 		fmt.Fprintln(os.Stderr, err)
-	// 	}
-	// 	os.Exit(1)
-	// }
-
-	code := m.Run()
-
-	os.Exit(code)
 }
 
 func TestNewDBContext(t *testing.T) {
@@ -124,6 +106,8 @@ func TestOpenContext(t *testing.T) {
 }
 
 func TestSelectContext(t *testing.T) {
+	prepareDB(t, beforeSqlPath)
+
 	ctx := context.Background()
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
 
@@ -145,6 +129,8 @@ func TestSelectContext(t *testing.T) {
 }
 
 func TestSelectTxContext(t *testing.T) {
+	prepareDB(t, beforeSqlPath)
+
 	ctx := context.Background()
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
 
@@ -173,6 +159,11 @@ func TestSelectTxContext(t *testing.T) {
 }
 
 func TestUpdateTxContext(t *testing.T) {
+	prepareDB(t, beforeSqlPath)
+	t.Cleanup(func() {
+		prepareDB(t, beforeSqlPath)
+	})
+
 	ctx := context.Background()
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
 

@@ -3,5 +3,5 @@
 - [x] Devide `Run()` into some methods
 - [x] Add example_test DB
 - [x] Unit tests
-- [ ] Fix unit tests' concurrency
+- [x] Fix unit tests' concurrency
 - [ ] Add docker user

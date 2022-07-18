@@ -158,7 +158,11 @@ func TestSelectTxContext(t *testing.T) {
 	}
 
 	tx := db.MustBeginTx(ctx, nil)
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	want := 1
 	args := map[string]any{"id": 1, "status": 0}
@@ -182,7 +186,11 @@ func TestUpdateTxContext(t *testing.T) {
 	}
 
 	tx := db.MustBeginTx(ctx, nil)
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	var want int64 = 1
 	args := map[string]any{"id": 1, "beforeSts": 0, "afterSts": 1}

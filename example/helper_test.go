@@ -14,8 +14,8 @@ import (
 
 const (
 	// SQL
-	queryDropTbl   = `DROP TABLE IF EXISTS example_db.users`
-	queryCreateTbl = `CREATE TABLE example_db.users (
+	queryDropTbl   = `DROP TABLE IF EXISTS users`
+	queryCreateTbl = `CREATE TABLE users (
 		id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 		name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
 		email varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -24,7 +24,7 @@ const (
 		updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		PRIMARY KEY (id)
 	  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
-	queryInsert = `INSERT INTO example_db.users (id, name, email, status, created_at, updated_at) 
+	queryInsert = `INSERT INTO users (id, name, email, status, created_at, updated_at) 
 	    VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 )
 

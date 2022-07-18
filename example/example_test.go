@@ -14,11 +14,11 @@ import (
 const (
 	cfgTyp      = "ini"
 	cfgSection  = "example_section"
-	testDataNum = 50000
-	chunkSize   = 10000
+	testDataNum = 10 // 50000
+	chunkSize   = 10 // 10000
 )
 
-var cfgPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "cmd", "example", "example.dsn")
+var cfgPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example", "example.dsn")
 
 // TODO: How to call a helper func in TestMain which does NOT have testing.T.
 func TestMain(m *testing.M) {

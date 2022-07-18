@@ -82,11 +82,13 @@ func Run(ctx context.Context, cfg *dbutil.ConfigFile, cond *Cond) (rerr error) {
 	return nil
 }
 
+// Executor has logger and db.
 type Executor struct {
 	Logger *zap.Logger
 	DB     *sqlx.DB
 }
 
+// NewExecutor returns Executor.
 func NewExecutor(ctx context.Context, cfg *dbutil.ConfigFile) (*Executor, error) {
 	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {
@@ -104,6 +106,7 @@ func NewExecutor(ctx context.Context, cfg *dbutil.ConfigFile) (*Executor, error)
 	}, nil
 }
 
+// prepare runs SELECT clause before update.
 func (ex *Executor) prepare(ctx context.Context, cond *Cond) error {
 	args := map[string]any{"id": cond.id, "status": cond.beforeSts}
 	rows, err := dbutil.SelectContext[User](ctx, ex.DB, querySelect, args)
@@ -118,6 +121,7 @@ func (ex *Executor) prepare(ctx context.Context, cond *Cond) error {
 	return nil
 }
 
+// exec runs UPDATE and SELECT clause on the same transaction.
 func (ex *Executor) exec(ctx context.Context, cond *Cond) error {
 	tx := ex.DB.MustBeginTx(ctx, nil)
 
@@ -148,6 +152,7 @@ func (ex *Executor) exec(ctx context.Context, cond *Cond) error {
 	return nil
 }
 
+// teardown runs SELECT clause after update.
 func (ex *Executor) teardown(ctx context.Context, cond *Cond) error {
 	args := map[string]any{"id": cond.id, "status": cond.afterSts}
 	rows, err := dbutil.SelectContext[User](ctx, ex.DB, querySelect, args)

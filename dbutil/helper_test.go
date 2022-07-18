@@ -12,21 +12,12 @@ import (
 )
 
 const (
-	// SQL
-	queryDropTbl   = `DROP TABLE IF EXISTS users`
-	queryCreateTbl = `CREATE TABLE users (
-		id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-		name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-		email varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-		status tinyint(11) UNSIGNED NOT NULL DEFAULT 0,
-		created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		PRIMARY KEY (id)
-	  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
-	queryInsert = `INSERT INTO users (id, name, email, status, created_at, updated_at) 
+	queryTruncateTbl = `TRUNCATE TABLE users`
+	queryInsert      = `INSERT INTO users (id, name, email, status, created_at, updated_at) 
 	    VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 )
 
+// setup initializes a DB for testing.
 func setup(ctx context.Context) error {
 	cfg, err := dbutil.ParseConfig(cfgTyp, cfgPath, cfgSection)
 	if err != nil {
@@ -55,11 +46,7 @@ func initTblContext(ctx context.Context, cfg *dbutil.Config, max, size uint64) (
 
 	tx := db.MustBeginTx(ctx, nil)
 
-	if _, err := tx.ExecContext(ctx, queryDropTbl); err != nil {
-		return multierr.Append(err, tx.Rollback())
-	}
-
-	if _, err := tx.ExecContext(ctx, queryCreateTbl); err != nil {
+	if _, err := tx.ExecContext(ctx, queryTruncateTbl); err != nil {
 		return multierr.Append(err, tx.Rollback())
 	}
 

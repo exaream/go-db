@@ -2,14 +2,12 @@ package dbutil_test
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/exaream/go-db/dbutil"
-	"go.uber.org/multierr"
 )
 
 const (
@@ -44,23 +42,15 @@ type user struct {
 }
 
 func TestMain(m *testing.M) {
-	ctx := context.Context(context.Background())
-
-	if errs := setup(ctx); errs != nil {
-		for _, err := range multierr.Errors(errs) {
-			fmt.Fprintln(os.Stderr, err)
-		}
-		os.Exit(1)
-	}
+	//ctx := context.Context(context.Background())
+	// if errs := setup(ctx); errs != nil {
+	// 	for _, err := range multierr.Errors(errs) {
+	// 		fmt.Fprintln(os.Stderr, err)
+	// 	}
+	// 	os.Exit(1)
+	// }
 
 	code := m.Run()
-
-	if errs := setup(ctx); errs != nil {
-		for _, err := range multierr.Errors(errs) {
-			fmt.Fprintln(os.Stderr, err)
-		}
-		os.Exit(1)
-	}
 
 	os.Exit(code)
 }

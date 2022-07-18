@@ -20,7 +20,6 @@ const (
 var cfgPath = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example", "example.dsn")
 
 func TestMain(m *testing.M) {
-	time.Sleep(1)
 	code := m.Run()
 	os.Exit(code)
 }

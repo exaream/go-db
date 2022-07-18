@@ -2,6 +2,9 @@ package dbutil_test
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"testing"
 	"time"
 
 	"github.com/bxcodec/faker/v3"
@@ -17,18 +20,38 @@ const (
 	    VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 )
 
-// setup initializes a DB for testing.
-func setup(ctx context.Context) error {
-	cfg, err := dbutil.ParseConfig(cfgTyp, cfgPath, cfgSection)
+var (
+	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example")
+	cfgPath       = filepath.Join(testDir, "example.dsn")
+	beforeSqlPath = filepath.Join(testDir, "before_update.sql")
+	afterSqlPath  = filepath.Join(testDir, "after_update.sql")
+)
+
+func prepareDB(t *testing.T, sqlPath string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	query, err := os.ReadFile(sqlPath)
 	if err != nil {
-		return err
+		t.Fatal(err)
 	}
 
-	if err := initTblContext(ctx, cfg, testDataNum, chunkSize); err != nil {
-		return err
+	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
+
+	db, err := dbutil.NewDBContext(ctx, cfg)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	return nil
+	args := make(map[string]any)
+	_, err = sqlx.NamedExecContext(ctx, db, queryTruncateTbl, args)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = sqlx.NamedExecContext(ctx, db, string(query), args)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 // initTblContext initializes a table for testing.

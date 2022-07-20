@@ -6,6 +6,6 @@
 - [x] Fix unit tests' concurrency
 - [x] Add Makefile
 - [x] Refactor Makefile
-- [ ] Add sampleuser
+- [x] Add sampleuser
 - [ ] Check some values in test cases
 - [ ] Move bulk insert function to example package

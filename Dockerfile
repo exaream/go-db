@@ -1,24 +1,28 @@
-FROM golang:1.18
+FROM golang:1.18.4-alpine3.16
 
-# Set timezone
+# Set timezone.
 ENV TZ Asia/Tokyo
 
-# Update OS's packages
-# Note: An error will occur if you separate the following commands
-# by a backslash and a line break instead of RUN.
-RUN apt-get update
-RUN apt-get upgrade -y
-RUN apt-get install -y vim
+# Update Alpine Linux.
+RUN apk update && \
+    apk upgrade && \
+    apk add alpine-sdk build-base sudo
 
-# Set the working directory
+# Add a group and a user for local environment.
+# Do NOT use the following setting for production environment.
+RUN addgroup -g 1000 samplegroup && \
+    adduser -S -D -u 1000 -G samplegroup sampleuser
+
+# Set the working directory.
 RUN mkdir -p /go/src/work
 WORKDIR /go/src/work
 ADD . /go/src/work
+RUN chown -R sampleuser:samplegroup /go/
+USER sampleuser
 
-# Install packages for checking by static analysis
-# Note: You can NOT install properly if you separate the following commands
-# by a backslash and a line break instead of RUN.
-RUN go install github.com/kisielk/errcheck@latest
-RUN go install golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment@latest
-RUN curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
-RUN cd /go/src/work && go mod tidy
+# Install Go packages.
+RUN go install github.com/kisielk/errcheck@latest && \
+    go install golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment@latest && \
+    curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest && \
+    cd /go/src/work && \
+    go mod tidy

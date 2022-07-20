@@ -1,4 +1,4 @@
-.PHONY: test test_cover cover build clean
+.PHONY: install login clean build test cover
 
 CMD_DIR := $(shell pwd)/cmd/example
 DB_DIR := $(shell pwd)/_local/mysql/storage

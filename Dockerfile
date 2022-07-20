@@ -6,7 +6,7 @@ ENV TZ Asia/Tokyo
 # Update Alpine Linux.
 RUN apk update && \
     apk upgrade && \
-    apk add alpine-sdk build-base sudo
+    apk add alpine-sdk build-base vim
 
 # Add a group and a user for local environment.
 # Do NOT use the following setting for production environment.
@@ -22,7 +22,6 @@ USER sampleuser
 
 # Install Go packages.
 RUN go install github.com/kisielk/errcheck@latest && \
-    go install golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment@latest && \
     curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest && \
     cd /go/src/work && \
     go mod tidy

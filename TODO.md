@@ -4,4 +4,8 @@
 - [x] Add example_test DB
 - [x] Unit tests
 - [x] Fix unit tests' concurrency
-- [ ] Add docker user
+- [x] Add Makefile
+- [x] Refactor Makefile
+- [x] Add sampleuser
+- [ ] Check some values in test cases
+- [ ] Move bulk insert function to example package

@@ -18,6 +18,9 @@ const (
 	queryTruncateTbl = `TRUNCATE TABLE users`
 	queryInsert      = `INSERT INTO users (id, name, email, status, created_at, updated_at) 
 	    VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
+
+	on  = 1
+	off = 0
 )
 
 var (

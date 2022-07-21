@@ -9,6 +9,8 @@ import (
 )
 
 const (
+	timeout     = 5
+	driver      = "mysql"
 	cfgTyp      = "ini"
 	cfgSection  = "example_section"
 	cfgHost     = "go_db_mysql"
@@ -16,12 +18,9 @@ const (
 	cfgUsername = "exampleuser"
 	cfgPassword = "examplepasswd"
 	cfgProtocol = "tcp"
-	driver      = "mysql"
 	cfgPort     = 3306
-	timeout     = 5
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
-
 	testDataNum = 10 // 50000
 	chunkSize   = 10 // 10000
 )
@@ -117,7 +116,7 @@ func TestSelectContext(t *testing.T) {
 	}
 
 	want := 1
-	args := map[string]any{"id": 1, "status": 0}
+	args := map[string]any{"id": 1, "status": off}
 	list, err := dbutil.SelectContext[user](ctx, db, querySelect, args)
 	if err != nil {
 		t.Error(err)
@@ -147,7 +146,7 @@ func TestSelectTxContext(t *testing.T) {
 	}()
 
 	want := 1
-	args := map[string]any{"id": 1, "status": 0}
+	args := map[string]any{"id": 1, "status": off}
 	list, err := dbutil.SelectTxContext[user](ctx, tx, querySelect, args)
 	if err != nil {
 		t.Error(err)
@@ -180,7 +179,7 @@ func TestUpdateTxContext(t *testing.T) {
 	}()
 
 	var want int64 = 1
-	args := map[string]any{"id": 1, "beforeSts": 0, "afterSts": 1}
+	args := map[string]any{"id": 1, "beforeSts": off, "afterSts": on}
 	got, err := dbutil.UpdateTxContext(ctx, tx, queryUpdate, args)
 	if err != nil {
 		t.Error(err)

@@ -20,7 +20,7 @@ func TestRun(t *testing.T) {
 	defer cancel()
 
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	cond := example.NewCond(1, 0, 1)
+	cond := example.NewCond(1, off, on)
 	if errs := example.Run(ctx, cfg, cond); errs != nil {
 		for _, err := range multierr.Errors(errs) {
 			t.Error(err)
@@ -53,7 +53,7 @@ func TestPrepare(t *testing.T) {
 	defer cancel()
 
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	cond := example.NewCond(1, 0, 1)
+	cond := example.NewCond(1, off, on)
 
 	ex, err := example.NewExecutor(ctx, cfg)
 	if err != nil {
@@ -75,7 +75,7 @@ func TestExec(t *testing.T) {
 	defer cancel()
 
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	cond := example.NewCond(1, 0, 1)
+	cond := example.NewCond(1, off, on)
 
 	ex, err := example.NewExecutor(ctx, cfg)
 	if err != nil {
@@ -97,7 +97,7 @@ func TestTeardown(t *testing.T) {
 	defer cancel()
 
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	cond := example.NewCond(1, 0, 1)
+	cond := example.NewCond(1, off, on)
 
 	ex, err := example.NewExecutor(ctx, cfg)
 	if err != nil {

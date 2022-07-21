@@ -15,6 +15,9 @@ const (
 	cfgTyp           = "ini"
 	cfgSection       = "example_section"
 	queryTruncateTbl = `TRUNCATE TABLE users;`
+
+	on  = 1
+	off = 0
 )
 
 var (

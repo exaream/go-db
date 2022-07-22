@@ -8,4 +8,6 @@
 - [x] Refactor Makefile
 - [x] Add sampleuser
 - [ ] Check some values in test cases
+- [ ] Multiple DBs for testing each package
+- [ ] Support PostgreSQL
 - [ ] Move bulk insert function to example package

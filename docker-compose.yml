@@ -8,16 +8,44 @@ services:
       - .:/go/src/work
     networks:
       - container-link
+
+  go_db_postgres:
+    container_name: go_db_postgres
+    image: postgres:14
+    volumes:
+      - "./_local/postgres/storage:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_DB=example
+      - POSTGRES_USER=exampleuser
+      - POSTGRES_PASSWORD=examplepasswd
+    ports:
+      - 5430:5432
+    networks:
+      - container-link
+  go_db_pgadmin:
+    container_name: go_db_pgadmin
+    image: dpage/pgadmin4:6
+    volumes:
+      - "./_local/pgadmin:/var/lib/pgadmin"
+    environment:
+        PGADMIN_DEFAULT_EMAIL: pgadmin@example.com
+        PGADMIN_DEFAULT_PASSWORD: pgadminpasswd
+    ports:
+      - 13901:80
+    hostname: pgadmin4
+    depends_on:
+      - go_db_postgres
+    networks:
+      - container-link
+
   go_db_mysql:
     container_name: go_db_mysql
-    image: mysql:5.7.25
+    image: mysql:8
     volumes:
       - "./_local/mysql/storage:/var/lib/mysql"
       - "./_local/mysql/setup/conf:/etc/mysql/conf.d"
       - "./_local/mysql/setup/entrypoint:/docker-entrypoint-initdb.d"
       - "./_local/mysql/setup/ddl:/docker-entrypoint-initdb.d/ddl"
-    # The following is the DB connection info for a local env.
-    # Never use the following in your production env.
     environment:
       - MYSQL_USER=exampleuser
       - MYSQL_PASSWORD=examplepasswd
@@ -33,10 +61,10 @@ services:
     environment:
       - PMA_ARBITRARY=0
       - PMA_HOSTS=go_db_mysql
-    links:
-      - go_db_mysql
     ports:
       - 13902:80
+    depends_on:
+      - go_db_mysql
     networks:
       - container-link
 

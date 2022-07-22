@@ -31,7 +31,7 @@ services:
         PGADMIN_DEFAULT_EMAIL: pgadmin@example.com
         PGADMIN_DEFAULT_PASSWORD: pgadminpasswd
     ports:
-      - 13901:80
+      - 8888:80
     hostname: pgadmin4
     depends_on:
       - go_db_postgres
@@ -62,7 +62,7 @@ services:
       - PMA_ARBITRARY=0
       - PMA_HOSTS=go_db_mysql
     ports:
-      - 13902:80
+      - 8880:80
     depends_on:
       - go_db_mysql
     networks:

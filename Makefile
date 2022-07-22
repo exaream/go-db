@@ -3,6 +3,7 @@
 CMD_DIR := $(shell pwd)/cmd/example
 MYSQL_DIR := $(shell pwd)/_local/mysql/storage
 POSTGRES_DIR := $(shell pwd)/_local/postgres/storage
+PGADMIN_DIR := $(shell pwd)/_local/pgadmin/
 
 ############################################
 # Run outside of Docker container.
@@ -16,13 +17,15 @@ login:
 
 clean:
 	docker compose down
-	rm -rf $(MYSQL_DIR)/*
-	rm -rf $(POSTGRES_DIR)/*
-	rm -rf $(CMD_DIR)/example
-	rm -rf $(shell pwd)/cover.out
-	rm -rf $(shell pwd)/cover.html
+	rm -rf $(MYSQL_DIR)/* \
+	       $(POSTGRES_DIR)/* \
+	       $(PGADMIN_DIR)/* \
+	       $(CMD_DIR)/example \
+	       $(shell pwd)/cover.out \
+	       $(shell pwd)/cover.html
 	touch $(MYSQL_DIR)/.gitkeep
 	touch $(POSTGRES_DIR)/.gitkeep
+	touch $(PGADMIN_DIR)/.gitkeep
 
 ############################################
 # Run inside of Docker container.

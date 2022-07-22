@@ -1,7 +1,8 @@
 .PHONY: install login clean build test cover
 
 CMD_DIR := $(shell pwd)/cmd/example
-DB_DIR := $(shell pwd)/_local/mysql/storage
+MYSQL_DIR := $(shell pwd)/_local/mysql/storage
+POSTGRES_DIR := $(shell pwd)/_local/postgres/storage
 
 ############################################
 # Run outside of Docker container.
@@ -15,11 +16,13 @@ login:
 
 clean:
 	docker compose down
-	rm -rf $(DB_DIR)/*
+	rm -rf $(MYSQL_DIR)/*
+	rm -rf $(POSTGRES_DIR)/*
 	rm -rf $(CMD_DIR)/example
 	rm -rf $(shell pwd)/cover.out
 	rm -rf $(shell pwd)/cover.html
-	touch $(DB_DIR)/.gitkeep
+	touch $(MYSQL_DIR)/.gitkeep
+	touch $(POSTGRES_DIR)/.gitkeep
 
 ############################################
 # Run inside of Docker container.

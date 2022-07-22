@@ -15,4 +15,6 @@
 # vendor/
 
 _local/mysql/storage
+_local/pgadmin/
+_local/postgres/storage
 !.gitkeep

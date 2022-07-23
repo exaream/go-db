@@ -24,7 +24,6 @@ clean:
 	       $(shell pwd)/cover.out \
 	       $(shell pwd)/cover.html
 	touch $(MYSQL_DIR)/.gitkeep
-	touch $(POSTGRES_DIR)/.gitkeep
 	touch $(PGADMIN_DIR)/.gitkeep
 
 ############################################

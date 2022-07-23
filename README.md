@@ -41,10 +41,6 @@ $ cd /go/src/work/cmd/example
 $ go run main.go --type=ini --path=example.dsn --section=example_section --timeout=10s --id=1 --before-sts=0 --after-sts=1
 ```
 
-How to access pgAdmin
-1. Check login info of `pgadmin@example.com` in `docker-compose.yml`
-2. Access [http://localhost:8888/](http://localhost:8888/)
-
 How to access phpMyAdmin
 1. Check login info of `exampleuser` in `docker-compose.yml`
 2. Access [http://localhost:8880/](http://localhost:8880/)

@@ -1,5 +1,5 @@
+-- Create table.
 DROP TABLE IF EXISTS `users`;
-
 CREATE TABLE `users` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,

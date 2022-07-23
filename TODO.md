@@ -6,7 +6,7 @@
 - [x] Fix unit tests' concurrency
 - [x] Add Makefile
 - [x] Refactor Makefile
-- [x] Add sampleuser
+- [x] Add exampleuser
 - [ ] Check some values in test cases
 - [ ] Multiple DBs for testing each package
 - [ ] Support PostgreSQL

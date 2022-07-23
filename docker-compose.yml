@@ -1,5 +1,6 @@
 version: "3"
 services:
+
   go_db_app:
     container_name: go_db_app
     build: .
@@ -11,17 +12,19 @@ services:
 
   go_db_postgres:
     container_name: go_db_postgres
-    image: postgres:14
+    image: postgres:14.4-alpine3.16
     volumes:
-      - "./_local/postgres/storage:/var/lib/postgresql/data"
+      - "./_local/postgres/setup/db:/docker-entrypoint-initdb.d"
+      - "./_local/postgres/setup/table:/docker-entrypoint-initdb.d/ddl"
+      - ./_local/postgres/storage:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=example
+      - POSTGRES_DB=postgres
       - POSTGRES_USER=exampleuser
       - POSTGRES_PASSWORD=examplepasswd
-    ports:
-      - 5430:5432
+      - TZ=Asia/Tokyo
     networks:
       - container-link
+
   go_db_pgadmin:
     container_name: go_db_pgadmin
     image: dpage/pgadmin4:6
@@ -44,8 +47,8 @@ services:
     volumes:
       - "./_local/mysql/storage:/var/lib/mysql"
       - "./_local/mysql/setup/conf:/etc/mysql/conf.d"
-      - "./_local/mysql/setup/entrypoint:/docker-entrypoint-initdb.d"
-      - "./_local/mysql/setup/ddl:/docker-entrypoint-initdb.d/ddl"
+      - "./_local/mysql/setup/db:/docker-entrypoint-initdb.d"
+      - "./_local/mysql/setup/table:/docker-entrypoint-initdb.d/ddl"
     environment:
       - MYSQL_USER=exampleuser
       - MYSQL_PASSWORD=examplepasswd
@@ -53,6 +56,7 @@ services:
       - TZ=Asia/Tokyo
     networks:
       - container-link
+
   go_db_phpmyadmin:
     container_name: go_db_phpmyadmin
     image: phpmyadmin/phpmyadmin
@@ -69,10 +73,10 @@ services:
       - container-link
 
 networks:
-  # Prevent generating "default" network automatically
+  # Prevent generating "default" network automatically.
   default:
     external: true
     name: bridge
-  # Network segment of inter-container communication
+  # Network segment of inter-container communication.
   container-link:
     name: go_db_network

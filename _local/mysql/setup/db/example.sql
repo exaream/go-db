@@ -7,6 +7,6 @@ FLUSH PRIVILEGES;
 
 -- Create tables.
 USE example;
-SOURCE /docker-entrypoint-initdb.d/ddl/example_table.sql;
+SOURCE /docker-entrypoint-initdb.d/ddl/example.sql;
 USE example_test;
-SOURCE /docker-entrypoint-initdb.d/ddl/example_table.sql;
+SOURCE /docker-entrypoint-initdb.d/ddl/example.sql;

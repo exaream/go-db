@@ -22,8 +22,7 @@ const (
 	cfgTz       = "Asia/Tokyo"
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
-	testDataNum = 10 // 50000
-	chunkSize   = 10 // 10000
+	testDataNum = 10
 )
 
 // Schema of users table

@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bxcodec/faker/v3"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/mattn/go-gimei"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
@@ -17,8 +19,12 @@ import (
 const (
 	// Layout of "Y-m-d H:i:s"
 	layout = "2006-01-02 15:04:05"
+
 	// SQL
-	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
+	queryTruncateTbl = `TRUNCATE TABLE users`
+	querySelect      = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
+	queryInsert      = `INSERT INTO users (id, name, email, status, created_at, updated_at) 
+VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
 )
 
@@ -104,6 +110,50 @@ func NewExecutor(ctx context.Context, cfg *dbutil.ConfigFile) (*Executor, error)
 		Logger: Logger,
 		DB:     db,
 	}, nil
+}
+
+// init initialize sample data
+// TODO: test
+func Init(ctx context.Context, cfg *dbutil.ConfigFile, max, chunkSize uint64) (err error) {
+	db, err := dbutil.NewDBContext(ctx, cfg)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if rerr := db.Close(); rerr != nil {
+			err = rerr
+		}
+	}()
+
+	tx := db.MustBeginTx(ctx, nil)
+
+	if _, err := tx.ExecContext(ctx, queryTruncateTbl); err != nil {
+		return multierr.Append(err, tx.Rollback())
+	}
+
+	if err := dbutil.BulkInsertTxContext(ctx, tx, users, queryInsert, max, chunkSize); err != nil {
+		return multierr.Append(err, tx.Rollback())
+	}
+
+	if err := tx.Commit(); err != nil {
+		return multierr.Append(err, tx.Rollback())
+	}
+
+	return nil
+}
+
+// TODO: test
+// TODO: Confirm how to use Generics to specify a type of return value.
+func users(min, max uint64) (list []User) {
+	now := time.Now()
+
+	var i uint64
+	for i = min; i <= max; i++ {
+		list = append(list, User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
+	}
+
+	return list
 }
 
 // prepare runs SELECT clause before update.

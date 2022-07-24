@@ -44,5 +44,5 @@ test:
 	go test ./... -count=1
 
 cover:
-	go test ./... -count=1 -p=1 -coverprofile=cover.out
+	go test ./... -count=1 -coverprofile=cover.out
 	go tool cover -html=cover.out -o cover.html

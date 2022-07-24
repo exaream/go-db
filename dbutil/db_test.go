@@ -12,13 +12,14 @@ const (
 	timeout     = 5
 	driver      = "mysql"
 	cfgTyp      = "ini"
-	cfgSection  = "example_section"
+	cfgSection  = "dbutil_test_section"
 	cfgHost     = "go_db_mysql"
-	cfgDatabase = "example_test"
+	cfgDatabase = "example_db_dbutil_pkg_test"
 	cfgUsername = "exampleuser"
 	cfgPassword = "examplepasswd"
 	cfgProtocol = "tcp"
 	cfgPort     = 3306
+	cfgTz       = "Asia/Tokyo"
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
 	testDataNum = 10 // 50000
@@ -78,6 +79,9 @@ func TestParseConfig(t *testing.T) {
 	}
 	if cfg.Port != cfgPort {
 		t.Error("failed to get protocol")
+	}
+	if cfg.Tz != cfgTz {
+		t.Error("failed to get timezone")
 	}
 }
 

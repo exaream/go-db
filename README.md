@@ -13,7 +13,7 @@ $ docker exec -it go_db_app sh
 Set 1 (process) to `-p` option to avoid conflicts when updating DB by multiple packages.
 ```shell
 $ cd /go/src/work/
-$ go test ./... -count=1 -p=1
+$ go test ./... -count=1
 ```
 
 ### Usage

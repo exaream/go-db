@@ -1,9 +1,10 @@
 .PHONY: install up login down clean build test cover
 
-CMD_DIR := $(shell pwd)/cmd/example
-MYSQL_DIR := $(shell pwd)/_local/mysql/storage
-POSTGRES_DIR := $(shell pwd)/_local/postgres/storage
-PGADMIN_DIR := $(shell pwd)/_local/pgadmin/
+MAKEFILE_DIR := $(shell pwd)
+CMD_DIR := $(MAKEFILE_DIR)/cmd/example
+MYSQL_DIR := $(MAKEFILE_DIR)/_local/mysql/storage
+POSTGRES_DIR := $(MAKEFILE_DIR)/_local/postgres/storage
+PGADMIN_DIR := $(MAKEFILE_DIR)/_local/pgadmin/
 
 ############################################
 # Run outside of Docker container.
@@ -27,8 +28,8 @@ clean:
 	       $(POSTGRES_DIR)/* \
 	       $(PGADMIN_DIR)/* \
 	       $(CMD_DIR)/example \
-	       $(shell pwd)/cover.out \
-	       $(shell pwd)/cover.html
+	       $(MAKEFILE_DIR)/cover.out \
+	       $(MAKEFILE_DIR)/cover.html
 	touch $(MYSQL_DIR)/.gitkeep
 	touch $(PGADMIN_DIR)/.gitkeep
 
@@ -40,7 +41,7 @@ build:
 	go build -o $(CMD_DIR)/example $(CMD_DIR)/main.go
 
 test:
-	go test ./... -count=1 -p=1
+	go test ./... -count=1
 
 cover:
 	go test ./... -count=1 -p=1 -coverprofile=cover.out

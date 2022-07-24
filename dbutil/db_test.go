@@ -12,9 +12,9 @@ const (
 	timeout     = 5
 	driver      = "mysql"
 	cfgTyp      = "ini"
-	cfgSection  = "example_section"
+	cfgSection  = "dbutil_test_section"
 	cfgHost     = "go_db_mysql"
-	cfgDatabase = "example_test"
+	cfgDatabase = "example_db_dbutil_pkg_test"
 	cfgUsername = "exampleuser"
 	cfgPassword = "examplepasswd"
 	cfgProtocol = "tcp"

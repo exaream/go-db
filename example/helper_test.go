@@ -13,7 +13,7 @@ import (
 
 const (
 	cfgTyp           = "ini"
-	cfgSection       = "example_section"
+	cfgSection       = "example_test_section"
 	queryTruncateTbl = `TRUNCATE TABLE users;`
 
 	on  = 1
@@ -22,7 +22,7 @@ const (
 
 var (
 	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example")
-	cfgPath       = filepath.Join(testDir, "example.dsn")
+	cfgPath       = filepath.Join(testDir, "test.dsn")
 	beforeSqlPath = filepath.Join(testDir, "before_update.sql")
 	afterSqlPath  = filepath.Join(testDir, "after_update.sql")
 )

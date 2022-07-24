@@ -1,4 +1,4 @@
-.PHONY: install login clean build test cover
+.PHONY: install up login down clean build test cover
 
 CMD_DIR := $(shell pwd)/cmd/example
 MYSQL_DIR := $(shell pwd)/_local/mysql/storage
@@ -12,8 +12,14 @@ PGADMIN_DIR := $(shell pwd)/_local/pgadmin/
 install:
 	docker compose up -d --build
 
+up:
+	docker compose up -d
+
 login:
 	docker exec -it go_db_app sh
+
+down:
+	docker compose down
 
 clean:
 	docker compose down

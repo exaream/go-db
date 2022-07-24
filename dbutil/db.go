@@ -13,7 +13,7 @@ import (
 )
 
 // Timezone
-const Tz = "Asia/Tokyo"
+const defaultTz = "Asia/Tokyo"
 
 // DB config file
 type ConfigFile struct {
@@ -80,7 +80,7 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 	cfg.Password = string(password)
 
 	if cfg.Tz == "" {
-		cfg.Tz = Tz
+		cfg.Tz = defaultTz
 	}
 
 	return cfg, nil

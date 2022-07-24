@@ -161,3 +161,21 @@ func UpdateTxContext(ctx context.Context, tx *sqlx.Tx, query string, args map[st
 
 	return num, nil
 }
+
+// BulkInsertTxContext executes Bulk Insert on context and transaction.
+// TODO: test
+func BulkInsertTxContext[T any](ctx context.Context, tx *sqlx.Tx, fn func(i, j uint64) []T, query string, max, chunkSize uint64) error {
+	var i uint64
+	for i = 1; i < max; i += chunkSize {
+		j := i + chunkSize - 1
+		if j > max {
+			j = max
+		}
+
+		if _, err := tx.NamedExecContext(ctx, query, fn(i, j)); err != nil {
+			return multierr.Append(err, tx.Rollback())
+		}
+	}
+
+	return nil
+}

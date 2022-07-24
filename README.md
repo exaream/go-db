@@ -8,6 +8,11 @@ This is a tool made of Go for operating MySQL.
 $ docker-compose up --build -d
 $ docker exec -it go_db_app sh
 ```
+Generate initial data.
+```shell
+$ cd /go/src/work/cmd/example
+$ go run main.go --init
+```
 
 ## Test
 Set 1 (process) to `-p` option to avoid conflicts when updating DB by multiple packages.

@@ -1,4 +1,4 @@
-; The following is the DB connection info for a local env.
+; The following is the DB connection info for a local/test env.
 ; Never use the following in your production env.
 
 [dbutil_test_section]

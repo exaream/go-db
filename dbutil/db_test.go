@@ -197,7 +197,8 @@ func TestUpdateTxContext(t *testing.T) {
 	}
 }
 
-// TODO Confirm why int type is chosen over uint type.
+// TODO: Confirm why int type is chosen over uint type.
+// SEE:  https://github.com/golang/go/issues/49311
 func TestBulkInsertTxContext(t *testing.T) {
 	ctx := context.Background()
 	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)

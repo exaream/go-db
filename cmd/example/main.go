@@ -13,7 +13,8 @@ import (
 
 const (
 	version   = "v0.2.0"
-	dataNum   = 50000
+	min       = 1
+	max       = 50000
 	chunkSize = 10000
 )
 
@@ -25,9 +26,9 @@ var (
 	path      = app.Flag("path", "Set a config file path.").Default("example.dsn").String()
 	section   = app.Flag("section", "Set a config section name.").Default("example_section").String()
 	timeout   = app.Flag("timeout", "Set a timeout value. e.g. 5s").Default("10s").Duration()
-	id        = app.Flag("id", "Set an ID.").Default("0").Uint64()
-	beforeSts = app.Flag("before-sts", "Set a before status.").Default("0").Uint8()
-	afterSts  = app.Flag("after-sts", "Set a after status.").Default("0").Uint8()
+	id        = app.Flag("id", "Set an ID.").Default("0").Int64()
+	beforeSts = app.Flag("before-sts", "Set a before status.").Default("0").Int8()
+	afterSts  = app.Flag("after-sts", "Set a after status.").Default("0").Int8()
 )
 
 func init() {
@@ -47,11 +48,11 @@ func main() {
 	cond := example.NewCond(*id, *beforeSts, *afterSts)
 
 	if *initFlg {
-		if err := example.Init(ctx, cfg, dataNum, chunkSize); err != nil {
+		if err := example.Init(ctx, cfg, min, max, chunkSize); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		fmt.Println("Succeeded in generating initial data.")
+		fmt.Println("Succeeded generating initial data.")
 		os.Exit(0)
 	}
 

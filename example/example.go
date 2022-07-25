@@ -31,10 +31,10 @@ VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 // Schema of users table
 // Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
 type User struct {
-	ID        uint64     `db:"id"`
+	ID        int64      `db:"id"`
 	Name      string     `db:"name"`
 	Email     string     `db:"email"`
-	Status    uint8      `db:"status"`
+	Status    int8       `db:"status"`
 	CreatedAt *time.Time `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
 }
@@ -46,13 +46,13 @@ func (u User) String() string {
 
 // Cond has conditions to create SQL.
 type Cond struct {
-	id        uint64
-	beforeSts uint8
-	afterSts  uint8
+	id        int64
+	beforeSts int8
+	afterSts  int8
 }
 
 // NewCond returns conditions to create SQL.
-func NewCond(id uint64, beforeSts, afterSts uint8) *Cond {
+func NewCond(id int64, beforeSts, afterSts int8) *Cond {
 	return &Cond{
 		id:        id,
 		beforeSts: beforeSts,
@@ -114,7 +114,7 @@ func NewExecutor(ctx context.Context, cfg *dbutil.ConfigFile) (*Executor, error)
 
 // init initialize sample data
 // TODO: test
-func Init(ctx context.Context, cfg *dbutil.ConfigFile, max, chunkSize uint64) (err error) {
+func Init(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize int64) (err error) {
 	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {
 		return err
@@ -132,7 +132,7 @@ func Init(ctx context.Context, cfg *dbutil.ConfigFile, max, chunkSize uint64) (e
 		return multierr.Append(err, tx.Rollback())
 	}
 
-	if err := dbutil.BulkInsertTxContext(ctx, tx, users, queryInsert, max, chunkSize); err != nil {
+	if _, err := dbutil.BulkInsertTxContext(ctx, tx, users, queryInsert, min, max, chunkSize); err != nil {
 		return multierr.Append(err, tx.Rollback())
 	}
 
@@ -145,10 +145,10 @@ func Init(ctx context.Context, cfg *dbutil.ConfigFile, max, chunkSize uint64) (e
 
 // TODO: test
 // TODO: Confirm how to use Generics to specify a type of return value.
-func users(min, max uint64) (list []User) {
+func users(min, max int64) (list []User) {
 	now := time.Now()
 
-	var i uint64
+	var i int64
 	for i = min; i <= max; i++ {
 		list = append(list, User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
 	}

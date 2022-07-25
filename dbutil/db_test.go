@@ -5,7 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bxcodec/faker/v3"
 	"github.com/exaream/go-db/dbutil"
+	"github.com/mattn/go-gimei"
 )
 
 const (
@@ -20,6 +22,8 @@ const (
 	cfgProtocol = "tcp"
 	cfgPort     = 3306
 	cfgTz       = "Asia/Tokyo"
+	queryInsert = `INSERT INTO users (name, email, status, created_at, updated_at) 
+VALUES (:name, :email, :status, :created_at, :updated_at)`
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
 	testDataNum = 10
@@ -28,10 +32,10 @@ const (
 // Schema of users table
 // Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
 type user struct {
-	ID        uint64     `db:"id"`
+	ID        int64      `db:"id"`
 	Name      string     `db:"name"`
 	Email     string     `db:"email"`
-	Status    uint8      `db:"status"`
+	Status    int8       `db:"status"`
 	CreatedAt *time.Time `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
 }
@@ -191,4 +195,53 @@ func TestUpdateTxContext(t *testing.T) {
 	if got != want {
 		t.Errorf("num want: %d, got: %d", want, got)
 	}
+}
+
+// TODO: Confirm why int type is chosen over uint type.
+// SEE:  https://github.com/golang/go/issues/49311
+func TestBulkInsertTxContext(t *testing.T) {
+	ctx := context.Background()
+	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
+
+	db, err := dbutil.NewDBContext(ctx, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var min, max, chunkSize int64 = 1, 10, 10
+	tx := db.MustBeginTx(ctx, nil)
+
+	num, err := dbutil.BulkInsertTxContext(ctx, tx, users, queryInsert, min, max, chunkSize)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if num != max {
+		t.Errorf("num want: %d, got: %d", max, num)
+	}
+
+	if err := tx.Rollback(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// TODO: Confirm that whether it is possible to use user struct without ID.
+type userWithoutID struct {
+	Name      string     `db:"name"`
+	Email     string     `db:"email"`
+	Status    int8       `db:"status"`
+	CreatedAt *time.Time `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+}
+
+// TODO: Confirm how to pass *testing.T as an argument.
+func users(min, max int64) (list []userWithoutID) {
+	now := time.Now()
+
+	var i int64
+	for i = min; i <= max; i++ {
+		list = append(list, userWithoutID{gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
+	}
+
+	return list
 }

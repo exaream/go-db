@@ -16,7 +16,6 @@ $ go run main.go --init --path=postgres.dsn
 ```
 
 ## Test
-Set 1 (process) to `-p` option to avoid conflicts when updating DB by multiple packages.
 ```shell
 $ cd /go/src/work/
 $ go test ./... -count=1

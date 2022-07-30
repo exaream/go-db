@@ -43,7 +43,7 @@ $ go run main.go --id=1 --before-sts=0 --after-sts=1
 Max arguments
 ```shell
 $ cd /go/src/work/cmd/example
-$ go run main.go --type=ini --path=example.dsn --section=example_section --timeout=10s --id=1 --before-sts=0 --after-sts=1
+$ go run main.go --type=ini --path=mysql.dsn --section=example_section --timeout=10s --id=1 --before-sts=0 --after-sts=1
 ```
 
 How to access phpMyAdmin

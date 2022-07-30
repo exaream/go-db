@@ -113,7 +113,6 @@ func OpenPostgreSQL(cfg *Config) (*sqlx.DB, error) {
 	}
 
 	return db, nil
-
 }
 
 // OpenContext returns DB handle.

@@ -11,31 +11,42 @@ import (
 )
 
 const (
-	timeout     = 5
-	driver      = "mysql"
-	cfgTyp      = "ini"
-	cfgSection  = "dbutil_test_section"
-	cfgHost     = "go_db_mysql"
-	cfgDatabase = "example_db_dbutil_pkg_test"
-	cfgUsername = "exampleuser"
-	cfgPassword = "examplepasswd"
-	cfgProtocol = "tcp"
-	cfgPort     = 3306
-	cfgTz       = "Asia/Tokyo"
+	timeout      = 5
+	driver       = "mysql"
+	cfgTyp       = "ini"
+	cfgTypDummy  = "xxx"
+	cfgSection   = "dbutil_test_section"
+	cfgHost      = "go_db_mysql"
+	cfgDatabase  = "example_db_dbutil_pkg_test"
+	cfgUsername  = "exampleuser"
+	cfgPassword  = "examplepasswd"
+	cfgProtocol  = "tcp"
+	cfgPort      = 3306
+	cfgPortDummy = 9999
+	cfgTz        = "Asia/Tokyo"
+
 	queryInsert = `INSERT INTO users (name, email, status, created_at, updated_at) 
 VALUES (:name, :email, :status, :created_at, :updated_at)`
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
-	testDataNum = 10
 )
 
 // Schema of users table
 // Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
 type user struct {
-	ID        int64      `db:"id"`
+	ID        uint       `db:"id"`
 	Name      string     `db:"name"`
 	Email     string     `db:"email"`
-	Status    int8       `db:"status"`
+	Status    uint       `db:"status"`
+	CreatedAt *time.Time `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+}
+
+// TODO: Confirm that whether it is possible to use user struct without ID.
+type userWithoutID struct {
+	Name      string     `db:"name"`
+	Email     string     `db:"email"`
+	Status    uint       `db:"status"`
 	CreatedAt *time.Time `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
 }
@@ -88,6 +99,13 @@ func TestParseConfig(t *testing.T) {
 	}
 }
 
+func TestParseConfigErr(t *testing.T) {
+	_, err := dbutil.ParseConfig(cfgTypDummy, cfgPath, cfgSection)
+	if err == nil {
+		t.Error("want: error, got: nil")
+	}
+}
+
 func TestOpenContext(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
 	defer cancel()
@@ -108,6 +126,25 @@ func TestOpenContext(t *testing.T) {
 
 	if err := db.PingContext(ctx); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestOpenContextErr(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+	defer cancel()
+
+	cfg := &dbutil.Config{
+		Host:     cfgHost,
+		Database: cfgDatabase,
+		Username: cfgUsername,
+		Password: cfgPassword,
+		Tz:       cfgTz,
+		Port:     cfgPortDummy, // wrong port
+	}
+
+	_, err := dbutil.OpenContext(ctx, cfg)
+	if err == nil {
+		t.Error("want: error, got: nil")
 	}
 }
 
@@ -197,7 +234,7 @@ func TestUpdateTxContext(t *testing.T) {
 	}
 }
 
-// TODO: Confirm why int type is chosen over uint type.
+// TODO: Confirm why int type is chosen over uint type. e.g. result.RowsAffected()
 // SEE:  https://github.com/golang/go/issues/49311
 func TestBulkInsertTxContext(t *testing.T) {
 	ctx := context.Background()
@@ -208,15 +245,15 @@ func TestBulkInsertTxContext(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var min, max, chunkSize int64 = 1, 10, 10
+	var min, max, chunkSize uint = 1, 10, 10
 	tx := db.MustBeginTx(ctx, nil)
 
-	num, err := dbutil.BulkInsertTxContext(ctx, tx, users, queryInsert, min, max, chunkSize)
+	num, err := dbutil.BulkInsertTxContext(ctx, tx, fakeUsers, queryInsert, min, max, chunkSize)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if num != max {
+	if num != int64(max) {
 		t.Errorf("num want: %d, got: %d", max, num)
 	}
 
@@ -225,21 +262,15 @@ func TestBulkInsertTxContext(t *testing.T) {
 	}
 }
 
-// TODO: Confirm that whether it is possible to use user struct without ID.
-type userWithoutID struct {
-	Name      string     `db:"name"`
-	Email     string     `db:"email"`
-	Status    int8       `db:"status"`
-	CreatedAt *time.Time `db:"created_at"`
-	UpdatedAt *time.Time `db:"updated_at"`
-}
-
+// fakeUsers returns fake user list.
 // TODO: Confirm how to pass *testing.T as an argument.
-func users(min, max int64) (list []userWithoutID) {
-	now := time.Now()
+func fakeUsers(min, max uint) (list []userWithoutID) {
+	if min == 0 || max == 0 {
+		return list
+	}
 
-	var i int64
-	for i = min; i <= max; i++ {
+	now := time.Now()
+	for i := min; i <= max; i++ {
 		list = append(list, userWithoutID{gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
 	}
 

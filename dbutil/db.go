@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 	"go.uber.org/multierr"
@@ -24,6 +25,7 @@ type ConfigFile struct {
 
 // DB config
 type Config struct {
+	Driver   string
 	Host     string
 	Database string
 	Username string
@@ -86,9 +88,7 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 	return cfg, nil
 }
 
-// OpenContext returns DB handle.
-// See: http://dsas.blog.klab.org/archives/52191467.html
-func OpenContext(ctx context.Context, cfg *Config) (*sqlx.DB, error) {
+func OpenMySQL(cfg *Config) (*sqlx.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@%s(%s:%d)/%s",
 		cfg.Username, cfg.Password, cfg.Protocol, cfg.Host, cfg.Port, cfg.Database)
 
@@ -96,6 +96,35 @@ func OpenContext(ctx context.Context, cfg *Config) (*sqlx.DB, error) {
 		"interpolateParams": {"true"}, "collation": {"utf8mb4_bin"}}
 
 	db, err := sqlx.Open("mysql", dsn+"?"+params.Encode())
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func OpenPostgreSQL(cfg *Config) (*sqlx.DB, error) {
+	dsn := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s", // TODO: sslmode
+		cfg.Host, cfg.Port, cfg.Username, cfg.Database, cfg.Password)
+
+	db, err := sqlx.Open("pgx", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+// OpenContext returns DB handle.
+// See: http://dsas.blog.klab.org/archives/52191467.html
+func OpenContext(ctx context.Context, cfg *Config) (db *sqlx.DB, err error) {
+	switch cfg.Driver {
+	case "mysql":
+		db, err = OpenMySQL(cfg)
+	case "postgres":
+		db, err = OpenPostgreSQL(cfg)
+	}
+
 	if err != nil {
 		return nil, err
 	}

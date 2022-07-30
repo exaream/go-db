@@ -1,7 +1,8 @@
 -- Create table.
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    -- id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
     name varchar(255) NOT NULL,
     email varchar(255)  NOT NULL,
     status smallint NOT NULL,

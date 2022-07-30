@@ -9,6 +9,7 @@
 - [x] Add exampleuser
 - [x] Check some values in test cases
 - [x] Multiple DBs for testing each package
+- [ ] Add test cases for PostgreSQL
 - [ ] Fix after review
 - [ ] Support PostgreSQL
 

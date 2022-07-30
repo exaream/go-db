@@ -14,8 +14,8 @@ import (
 const (
 	queryTruncateTbl = `TRUNCATE TABLE users`
 
-	on  = 1
-	off = 0
+	on  uint = 1
+	off uint = 0
 )
 
 var (

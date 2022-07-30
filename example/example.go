@@ -31,10 +31,10 @@ VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 // Schema of users table
 // Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
 type User struct {
-	ID        int64      `db:"id"`
+	ID        uint       `db:"id"`
 	Name      string     `db:"name"`
 	Email     string     `db:"email"`
-	Status    int8       `db:"status"`
+	Status    int        `db:"status"`
 	CreatedAt *time.Time `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
 }
@@ -46,13 +46,13 @@ func (u User) String() string {
 
 // Cond has conditions to create SQL.
 type Cond struct {
-	id        int64
-	beforeSts int8
-	afterSts  int8
+	id        uint
+	beforeSts uint
+	afterSts  uint
 }
 
 // NewCond returns conditions to create SQL.
-func NewCond(id int64, beforeSts, afterSts int8) *Cond {
+func NewCond(id, beforeSts, afterSts uint) *Cond {
 	return &Cond{
 		id:        id,
 		beforeSts: beforeSts,
@@ -113,11 +113,10 @@ func NewExecutor(ctx context.Context, cfg *dbutil.ConfigFile) (*Executor, error)
 }
 
 // init initialize sample data
-// TODO: test
-func Init(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize int64) (err error) {
+func Init(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize uint) (total int64, err error) {
 	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	defer func() {
@@ -129,27 +128,29 @@ func Init(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize int64
 	tx := db.MustBeginTx(ctx, nil)
 
 	if _, err := tx.ExecContext(ctx, queryTruncateTbl); err != nil {
-		return multierr.Append(err, tx.Rollback())
+		return 0, multierr.Append(err, tx.Rollback())
 	}
 
-	if _, err := dbutil.BulkInsertTxContext(ctx, tx, users, queryInsert, min, max, chunkSize); err != nil {
-		return multierr.Append(err, tx.Rollback())
+	total, err = dbutil.BulkInsertTxContext(ctx, tx, fakeUsers, queryInsert, min, max, chunkSize)
+	if err != nil {
+		return 0, multierr.Append(err, tx.Rollback())
 	}
 
 	if err := tx.Commit(); err != nil {
-		return multierr.Append(err, tx.Rollback())
+		return 0, multierr.Append(err, tx.Rollback())
 	}
 
-	return nil
+	return total, nil
 }
 
-// TODO: test
 // TODO: Confirm how to use Generics to specify a type of return value.
-func users(min, max int64) (list []User) {
-	now := time.Now()
+func fakeUsers(min, max uint) (list []User) {
+	if min == 0 || max == 0 {
+		return list
+	}
 
-	var i int64
-	for i = min; i <= max; i++ {
+	now := time.Now()
+	for i := min; i <= max; i++ {
 		list = append(list, User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
 	}
 

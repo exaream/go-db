@@ -7,7 +7,8 @@
 - [x] Add Makefile
 - [x] Refactor Makefile
 - [x] Add exampleuser
-- [ ] Check some values in test cases
-- [ ] Multiple DBs for testing each package
+- [x] Check some values in test cases
+- [x] Multiple DBs for testing each package
+- [ ] Fix after review
 - [ ] Support PostgreSQL
-- [ ] Move bulk insert function to example package
+

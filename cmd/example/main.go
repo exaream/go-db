@@ -26,9 +26,9 @@ var (
 	path      = app.Flag("path", "Set a config file path.").Default("example.dsn").String()
 	section   = app.Flag("section", "Set a config section name.").Default("example_section").String()
 	timeout   = app.Flag("timeout", "Set a timeout value. e.g. 5s").Default("10s").Duration()
-	id        = app.Flag("id", "Set an ID.").Default("0").Int64()
-	beforeSts = app.Flag("before-sts", "Set a before status.").Default("0").Int8()
-	afterSts  = app.Flag("after-sts", "Set a after status.").Default("0").Int8()
+	id        = app.Flag("id", "Set an ID.").Default("0").Uint()
+	beforeSts = app.Flag("before-sts", "Set a before status.").Default("0").Uint()
+	afterSts  = app.Flag("after-sts", "Set a after status.").Default("0").Uint()
 )
 
 func init() {
@@ -48,11 +48,12 @@ func main() {
 	cond := example.NewCond(*id, *beforeSts, *afterSts)
 
 	if *initFlg {
-		if err := example.Init(ctx, cfg, min, max, chunkSize); err != nil {
+		total, err := example.Init(ctx, cfg, min, max, chunkSize)
+		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		fmt.Println("Succeeded generating initial data.")
+		fmt.Printf("Successfully generated %d records as initial data.\n", total)
 		os.Exit(0)
 	}
 

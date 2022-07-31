@@ -22,8 +22,8 @@ const (
 	// SQL
 	queryTruncateTbl = `TRUNCATE TABLE users`
 	querySelect      = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
-	queryInsert      = `INSERT INTO users (id, name, email, status, created_at, updated_at) 
-VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
+	queryInsert      = `INSERT INTO users (name, email, status, created_at, updated_at) 
+VALUES (:name, :email, :status, :created_at, :updated_at)`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
 )
 
@@ -31,6 +31,14 @@ VALUES (:id, :name, :email, :status, :created_at, :updated_at)`
 // Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
 type User struct {
 	ID        uint       `db:"id"`
+	Name      string     `db:"name"`
+	Email     string     `db:"email"`
+	Status    int        `db:"status"`
+	CreatedAt *time.Time `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+}
+
+type UserWithoutID struct {
 	Name      string     `db:"name"`
 	Email     string     `db:"email"`
 	Status    int        `db:"status"`

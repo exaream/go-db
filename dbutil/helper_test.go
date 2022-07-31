@@ -15,8 +15,8 @@ import (
 
 const (
 	timeout      = 5
-	on      uint = 1
-	off     uint = 0
+	active  uint = 1
+	non     uint = 0
 
 	// Config Common
 	cfgType     = "ini"

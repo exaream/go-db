@@ -11,95 +11,148 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	var t *testing.T
-	defer prepareDB(t, beforeSqlPath) // TODO: Confirm that using defer in TestMain is OK
-	prepareDB(t, beforeSqlPath)
+	// TODO: Confirm how to use *testing.T in this method.
+	initDB(mysqlDBType, beforeSqlPath)
+	initDB(pgsqlDBType, beforeSqlPath)
 	m.Run()
 }
 
 func TestRun(t *testing.T) {
-	t.Cleanup(func() {
-		prepareDB(t, beforeSqlPath) // TODO: Confirm better way. Is it a good practice to revert the DB for each test?
-	})
+	cases := map[string]struct {
+		dbType string
+		path   string
+		id     uint
+	}{
+		"mysql": {mysqlDBType, mysqlCfgPath, 1},
+		"pgsql": {pgsqlDBType, pgsqlCfgPath, 1},
+	}
 
-	var id uint = 1
-	cond := example.NewCond(id, off, on)
-	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel() // TODO: Is it better to use t.Cleanup?
+	for name, tt := range cases {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			t.Cleanup(func() {
+				prepareDB(t, tt.dbType, beforeSqlPath)
+			})
 
-	if errs := example.Run(ctx, cfg, cond); errs != nil {
-		for _, err := range multierr.Errors(errs) {
-			t.Error(err)
-		}
+			cond := example.NewCond(tt.id, non, active)
+			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			t.Cleanup(cancel)
+
+			if errs := example.Run(ctx, cfg, cond); errs != nil {
+				for _, err := range multierr.Errors(errs) {
+					t.Error(err)
+				}
+			}
+		})
 	}
 }
 
-// TODO: TestRun と TestRunErr をまとめたほうが良いか確認
 func TestRunErr(t *testing.T) {
-	t.Cleanup(func() {
-		prepareDB(t, beforeSqlPath)
-	})
+	cases := map[string]struct {
+		dbType string
+		path   string
+		id     uint
+	}{
+		"mysql": {mysqlDBType, mysqlCfgPath, 0},
+		"pgsql": {pgsqlDBType, pgsqlCfgPath, 0},
+	}
 
-	var id uint = 0
-	cond := example.NewCond(id, off, on)
-	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
+	for name, tt := range cases {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			t.Cleanup(func() {
+				prepareDB(t, tt.dbType, beforeSqlPath)
+			})
 
-	if err := example.Run(ctx, cfg, cond); err == nil {
-		t.Error("want: error, got: nil")
+			cond := example.NewCond(tt.id, non, active)
+			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			t.Cleanup(cancel)
+
+			if err := example.Run(ctx, cfg, cond); err == nil {
+				t.Error("want: error, got: nil")
+			}
+		})
 	}
 }
 
 func TestNewExecutor(t *testing.T) {
-	t.Cleanup(func() {
-		prepareDB(t, beforeSqlPath)
-	})
-
-	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	ex, err := example.NewExecutor(ctx, cfg)
-	if err != nil {
-		t.Fatal(err)
+	cases := map[string]struct {
+		dbType string
+		path   string
+	}{
+		"mysql": {mysqlDBType, mysqlCfgPath},
+		"pgsql": {pgsqlDBType, pgsqlCfgPath},
 	}
 
-	if err := ex.DB.PingContext(ctx); err != nil {
-		t.Error(err)
+	for name, tt := range cases {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			t.Cleanup(func() {
+				prepareDB(t, tt.dbType, beforeSqlPath)
+			})
+
+			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			t.Cleanup(cancel)
+
+			ex, err := example.NewExecutor(ctx, cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := ex.DB.PingContext(ctx); err != nil {
+				t.Error(err)
+			}
+		})
 	}
 }
 
 func TestInit(t *testing.T) {
-	t.Cleanup(func() {
-		prepareDB(t, beforeSqlPath)
-	})
-
 	cases := map[string]struct {
+		dbType    string
+		path      string
 		min       uint
 		max       uint
 		chunkSize uint
 
 		want int64
 	}{
-		"one":               {1, 1, 1, 1},
-		"divisible chunk":   {1, 100, 10, 100},
-		"indivisible chunk": {1, 100, 11, 100},
+		// MySQL
+		"mysql 1":                 {mysqlDBType, mysqlCfgPath, 1, 1, 1, 1},
+		"mysql divisible chunk":   {mysqlDBType, mysqlCfgPath, 1, 100, 10, 100},
+		"mysql indivisible chunk": {mysqlDBType, mysqlCfgPath, 1, 100, 11, 100},
+		// PostgreSQL
+		"pgsql 1":                 {pgsqlDBType, pgsqlCfgPath, 1, 1, 1, 1},
+		"pgsql divisible chunk":   {pgsqlDBType, pgsqlCfgPath, 1, 100, 10, 100},
+		"pgsql indivisible chunk": {pgsqlDBType, pgsqlCfgPath, 1, 100, 11, 100},
 	}
 
 	for name, tt := range cases {
 		tt := tt
-
 		t.Run(name, func(t *testing.T) {
-			cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
+			t.Parallel()
+			t.Cleanup(func() {
+				prepareDB(t, tt.dbType, beforeSqlPath)
+			})
+
+			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
+			t.Cleanup(cancel)
 
 			db, err := dbutil.NewDBContext(ctx, cfg)
 			if err != nil {
 				t.Fatal(err)
 			}
+			t.Cleanup(func() {
+				if err := db.Close(); err != nil {
+					t.Fatal(err)
+				}
+			})
 
 			got, err := example.Init(ctx, cfg, tt.min, tt.max, tt.chunkSize)
 			if err != nil {
@@ -109,11 +162,6 @@ func TestInit(t *testing.T) {
 				t.Errorf("want: %d, got: %d", tt.want, got)
 			}
 
-			t.Cleanup(func() {
-				if rerr := db.Close(); rerr != nil {
-					t.Fatal(rerr)
-				}
-			})
 		})
 	}
 }
@@ -146,129 +194,215 @@ func TestUsers(t *testing.T) {
 }
 
 func TestPrepare(t *testing.T) {
-	t.Cleanup(func() {
-		prepareDB(t, beforeSqlPath)
-	})
-
-	var id uint = 1
-	cond := example.NewCond(id, off, on)
-	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	ex, err := example.NewExecutor(ctx, cfg)
-	if err != nil {
-		t.Fatal(err)
+	cases := map[string]struct {
+		dbType string
+		path   string
+		id     uint
+	}{
+		"mysql": {mysqlDBType, mysqlCfgPath, 1},
+		"pgsql": {pgsqlDBType, pgsqlCfgPath, 1},
 	}
 
-	if err := example.ExportPrepare(ex, ctx, cond); err != nil {
-		t.Error(err)
+	for name, tt := range cases {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			t.Cleanup(func() {
+				prepareDB(t, tt.dbType, beforeSqlPath)
+			})
+
+			cond := example.NewCond(tt.id, non, active)
+			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			t.Cleanup(cancel)
+
+			ex, err := example.NewExecutor(ctx, cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := example.ExportPrepare(ex, ctx, cond); err != nil {
+				t.Error(err)
+			}
+		})
 	}
 }
 
 func TestPrepareErr(t *testing.T) {
-	t.Cleanup(func() {
-		prepareDB(t, beforeSqlPath)
-	})
-
-	var id uint = 0
-	cond := example.NewCond(id, off, on)
-	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	ex, err := example.NewExecutor(ctx, cfg)
-	if err != nil {
-		t.Fatal(err)
+	cases := map[string]struct {
+		dbType string
+		path   string
+		id     uint
+	}{
+		"mysql": {mysqlDBType, mysqlCfgPath, 0},
+		"pgsql": {pgsqlDBType, pgsqlCfgPath, 0},
 	}
 
-	if err := example.ExportPrepare(ex, ctx, cond); err == nil {
-		t.Error("want: error, got: nil")
+	for name, tt := range cases {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			t.Cleanup(func() {
+				prepareDB(t, tt.dbType, beforeSqlPath)
+			})
+
+			cond := example.NewCond(tt.id, non, active)
+			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			t.Cleanup(cancel)
+
+			ex, err := example.NewExecutor(ctx, cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := example.ExportPrepare(ex, ctx, cond); err == nil {
+				t.Error("want: error, got: nil")
+			}
+		})
 	}
 }
 
 func TestExec(t *testing.T) {
-	t.Cleanup(func() {
-		prepareDB(t, beforeSqlPath)
-	})
-
-	var id uint = 1
-	cond := example.NewCond(id, off, on)
-	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	ex, err := example.NewExecutor(ctx, cfg)
-	if err != nil {
-		t.Fatal(err)
+	cases := map[string]struct {
+		dbType string
+		path   string
+		id     uint
+	}{
+		"mysql": {mysqlDBType, mysqlCfgPath, 1},
+		"pgsql": {pgsqlDBType, pgsqlCfgPath, 1},
 	}
 
-	if err := example.ExportExec(ex, ctx, cond); err != nil {
-		t.Error(err)
+	for name, tt := range cases {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			t.Cleanup(func() {
+				prepareDB(t, tt.dbType, beforeSqlPath)
+			})
+
+			cond := example.NewCond(tt.id, non, active)
+			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			t.Cleanup(cancel)
+
+			ex, err := example.NewExecutor(ctx, cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := example.ExportExec(ex, ctx, cond); err != nil {
+				t.Error(err)
+			}
+		})
 	}
 }
 
 func TestExecErr(t *testing.T) {
-	t.Cleanup(func() {
-		prepareDB(t, beforeSqlPath)
-	})
+	t.Parallel()
 
-	var id uint = 0
-	cond := example.NewCond(id, off, on)
-	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	ex, err := example.NewExecutor(ctx, cfg)
-	if err != nil {
-		t.Fatal(err)
+	cases := map[string]struct {
+		dbType string
+		path   string
+		id     uint
+	}{
+		"mysql": {mysqlDBType, mysqlCfgPath, 0},
+		"pgsql": {pgsqlDBType, pgsqlCfgPath, 0},
 	}
 
-	if err := example.ExportExec(ex, ctx, cond); err == nil {
-		t.Error("want: error, got: nil")
+	for name, tt := range cases {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			t.Cleanup(func() {
+				prepareDB(t, tt.dbType, beforeSqlPath)
+			})
+
+			cond := example.NewCond(tt.id, non, active)
+			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			t.Cleanup(cancel)
+
+			ex, err := example.NewExecutor(ctx, cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := example.ExportExec(ex, ctx, cond); err == nil {
+				t.Error("want: error, got: nil")
+			}
+		})
 	}
 }
 
 func TestTeardown(t *testing.T) {
-	prepareDB(t, afterSqlPath)
-	t.Cleanup(func() {
-		prepareDB(t, beforeSqlPath)
-	})
-
-	var id uint = 1
-	cond := example.NewCond(id, off, on)
-	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	ex, err := example.NewExecutor(ctx, cfg)
-	if err != nil {
-		t.Fatal(err)
+	cases := map[string]struct {
+		dbType string
+		path   string
+		id     uint
+	}{
+		"mysql": {mysqlDBType, mysqlCfgPath, 1},
+		"pgsql": {pgsqlDBType, pgsqlCfgPath, 1},
 	}
 
-	if err := example.ExportTeardown(ex, ctx, cond); err != nil {
-		t.Error(err)
+	for name, tt := range cases {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			prepareDB(t, tt.dbType, afterSqlPath)
+			t.Cleanup(func() {
+				prepareDB(t, tt.dbType, beforeSqlPath)
+			})
+
+			cond := example.NewCond(tt.id, non, active)
+			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			t.Cleanup(cancel)
+
+			ex, err := example.NewExecutor(ctx, cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := example.ExportTeardown(ex, ctx, cond); err != nil {
+				t.Error(err)
+			}
+		})
 	}
 }
 
 func TestTeardownErr(t *testing.T) {
-	prepareDB(t, afterSqlPath)
-	t.Cleanup(func() {
-		prepareDB(t, beforeSqlPath)
-	})
-
-	var id uint = 0
-	cond := example.NewCond(id, off, on)
-	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	ex, err := example.NewExecutor(ctx, cfg)
-	if err != nil {
-		t.Fatal(err)
+	cases := map[string]struct {
+		dbType string
+		path   string
+		id     uint
+	}{
+		"mysql": {mysqlDBType, mysqlCfgPath, 0},
+		"pgsql": {pgsqlDBType, pgsqlCfgPath, 0},
 	}
 
-	if err := example.ExportTeardown(ex, ctx, cond); err == nil {
-		t.Error("want: error, got: nil")
+	for name, tt := range cases {
+		tt := tt
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			prepareDB(t, tt.dbType, afterSqlPath)
+			t.Cleanup(func() {
+				prepareDB(t, tt.dbType, beforeSqlPath)
+			})
+
+			cond := example.NewCond(tt.id, non, active)
+			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			t.Cleanup(cancel)
+
+			ex, err := example.NewExecutor(ctx, cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := example.ExportTeardown(ex, ctx, cond); err == nil {
+				t.Error("want: error, got: nil")
+			}
+		})
 	}
 }

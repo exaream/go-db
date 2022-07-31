@@ -248,7 +248,7 @@ func TestSelectContext(t *testing.T) {
 			}
 
 			want := 1
-			args := map[string]any{"id": 1, "status": off}
+			args := map[string]any{"id": 1, "status": non}
 			list, err := dbutil.SelectContext[user](ctx, db, querySelect, args)
 			if err != nil {
 				t.Error(err)
@@ -293,7 +293,7 @@ func TestSelectTxContext(t *testing.T) {
 			})
 
 			want := 1
-			args := map[string]any{"id": 1, "status": off}
+			args := map[string]any{"id": 1, "status": non}
 			list, err := dbutil.SelectTxContext[user](ctx, tx, querySelect, args)
 			if err != nil {
 				t.Error(err)
@@ -338,7 +338,7 @@ func TestUpdateTxContext(t *testing.T) {
 			})
 
 			var want int64 = 1
-			args := map[string]any{"id": 1, "beforeSts": off, "afterSts": on}
+			args := map[string]any{"id": 1, "beforeSts": non, "afterSts": active}
 			got, err := dbutil.UpdateTxContext(ctx, tx, queryUpdate, args)
 			if err != nil {
 				t.Error(err)

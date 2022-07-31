@@ -9,7 +9,8 @@
 - [x] Add exampleuser
 - [x] Check some values in test cases
 - [x] Multiple DBs for testing each package
+- [x] Support PostgreSQL
+- [ ] Change test cases to DB switchable form
 - [ ] Add test cases for PostgreSQL
 - [ ] Fix after review
-- [ ] Support PostgreSQL
 

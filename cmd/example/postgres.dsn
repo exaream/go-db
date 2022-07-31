@@ -1,7 +1,7 @@
 ; The following is the DB connection info for a local env.
 ; Never use the following in your production env.
 [example_section]
-driver   = postgres
+type     = postgres
 host     = go_db_postgres
 database = example_db
 username = exampleuser

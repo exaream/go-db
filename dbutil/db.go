@@ -3,8 +3,10 @@ package dbutil
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/url"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -14,7 +16,15 @@ import (
 )
 
 // Timezone
-const defaultTz = "Asia/Tokyo"
+const (
+	defaultTz = "Asia/Tokyo"
+	// MySQL
+	mysqlDBType = "mysql"
+	mysqlDriver = "mysql"
+	// PostgreSQL
+	pgsqlDBType = "pgsql"
+	pgsqlDriver = "pgx"
+)
 
 // DB config file
 type ConfigFile struct {
@@ -30,9 +40,13 @@ type Config struct {
 	Database string
 	Username string
 	Password string
+	Port     uint16 // 1~65535
 	Protocol string
 	Tz       string
-	Port     uint16 // 1~65535
+
+	// TODO: Confirm remaining in Config or removing from Config
+	Driver string
+	Src    string
 }
 
 // NewDBContext returns DB handle.
@@ -61,6 +75,10 @@ func NewConfigFile(typ, path, section string) *ConfigFile {
 
 // ParseConfig returns DB config by DB config file.
 func ParseConfig(typ, path, section string) (*Config, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil, err
+	}
+
 	v := viper.New()
 	v.SetConfigType(typ)
 	v.SetConfigFile(path)
@@ -70,6 +88,10 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 	}
 
 	sub := v.Sub(section)
+	if sub == nil {
+		return nil, errors.New("failed to parse config by section")
+	}
+
 	var cfg *Config
 	if err := sub.Unmarshal(&cfg); err != nil {
 		return nil, err
@@ -85,6 +107,17 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 		cfg.Tz = defaultTz
 	}
 
+	switch cfg.Type {
+	case mysqlDBType:
+		cfg.Driver = mysqlDriver
+		cfg.Src = cfg.dataSrcMySQL()
+	case pgsqlDBType:
+		cfg.Driver = pgsqlDriver
+		cfg.Src = cfg.dataSrcPgSQL()
+	default:
+		return nil, errors.New("Unsupported DB type")
+	}
+
 	return cfg, nil
 }
 
@@ -98,7 +131,7 @@ func (cfg *Config) dataSrcMySQL() string {
 	return dsn + "?" + params.Encode()
 }
 
-func (cfg *Config) dataSrcPostgres() string {
+func (cfg *Config) dataSrcPgSQL() string {
 	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s", // TODO: sslmode
 		cfg.Host, cfg.Port, cfg.Username, cfg.Database, cfg.Password)
 }
@@ -106,14 +139,7 @@ func (cfg *Config) dataSrcPostgres() string {
 // OpenContext returns DB handle.
 // See: http://dsas.blog.klab.org/archives/52191467.html
 func OpenContext(ctx context.Context, cfg *Config) (db *sqlx.DB, err error) {
-	switch cfg.Type {
-	case "mysql":
-		db, err = sqlx.Open("mysql", cfg.dataSrcMySQL())
-	case "postgres":
-		db, err = sqlx.Open("pgx", cfg.dataSrcPostgres())
-	default:
-		return nil, fmt.Errorf("Unsupported DB: %s", cfg.Type)
-	}
+	db, err = sqlx.Open(cfg.Driver, cfg.Src)
 
 	if err != nil {
 		return nil, err

@@ -2,7 +2,7 @@
 ; Never use the following in your production env.
 
 [dbutil_test_section]
-driver   = mysql
+type     = mysql
 host     = go_db_mysql
 database = example_db_dbutil_pkg_test
 username = exampleuser

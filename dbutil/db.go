@@ -18,14 +18,14 @@ const defaultTz = "Asia/Tokyo"
 
 // DB config file
 type ConfigFile struct {
-	Typ     string
+	Type    string
 	Path    string
 	Section string
 }
 
 // DB config
 type Config struct {
-	Driver   string
+	Type     string
 	Host     string
 	Database string
 	Username string
@@ -37,7 +37,7 @@ type Config struct {
 
 // NewDBContext returns DB handle.
 func NewDBContext(ctx context.Context, f *ConfigFile) (*sqlx.DB, error) {
-	cfg, err := ParseConfig(f.Typ, f.Path, f.Section)
+	cfg, err := ParseConfig(f.Type, f.Path, f.Section)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func NewDBContext(ctx context.Context, f *ConfigFile) (*sqlx.DB, error) {
 // NewConfigFile returns DB config file.
 func NewConfigFile(typ, path, section string) *ConfigFile {
 	return &ConfigFile{
-		Typ:     typ,
+		Type:    typ,
 		Path:    path,
 		Section: section,
 	}
@@ -88,41 +88,31 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 	return cfg, nil
 }
 
-func OpenMySQL(cfg *Config) (*sqlx.DB, error) {
+func (cfg *Config) dataSrcMySQL() string {
 	dsn := fmt.Sprintf("%s:%s@%s(%s:%d)/%s",
 		cfg.Username, cfg.Password, cfg.Protocol, cfg.Host, cfg.Port, cfg.Database)
 
 	params := url.Values{"parseTime": {"true"}, "loc": {cfg.Tz},
 		"interpolateParams": {"true"}, "collation": {"utf8mb4_bin"}}
 
-	db, err := sqlx.Open("mysql", dsn+"?"+params.Encode())
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return dsn + "?" + params.Encode()
 }
 
-func OpenPostgreSQL(cfg *Config) (*sqlx.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s", // TODO: sslmode
+func (cfg *Config) dataSrcPostgres() string {
+	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s", // TODO: sslmode
 		cfg.Host, cfg.Port, cfg.Username, cfg.Database, cfg.Password)
-
-	db, err := sqlx.Open("pgx", dsn)
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
 }
 
 // OpenContext returns DB handle.
 // See: http://dsas.blog.klab.org/archives/52191467.html
 func OpenContext(ctx context.Context, cfg *Config) (db *sqlx.DB, err error) {
-	switch cfg.Driver {
+	switch cfg.Type {
 	case "mysql":
-		db, err = OpenMySQL(cfg)
+		db, err = sqlx.Open("mysql", cfg.dataSrcMySQL())
 	case "postgres":
-		db, err = OpenPostgreSQL(cfg)
+		db, err = sqlx.Open("pgx", cfg.dataSrcPostgres())
+	default:
+		return nil, fmt.Errorf("Unsupported DB: %s", cfg.Type)
 	}
 
 	if err != nil {

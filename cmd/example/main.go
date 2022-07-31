@@ -23,7 +23,7 @@ var (
 	app       = kingpin.New("example", "An example command made of Go to operate MySQL.")
 	initFlg   = app.Flag("init", "Set true if you want to initialize data").Default("false").Bool()
 	typ       = app.Flag("type", "Set a config type.").Default("ini").String()
-	path      = app.Flag("path", "Set a config file path.").Default("postgres.dsn").String()
+	path      = app.Flag("path", "Set a config file path.").Default("mysql.dsn").String()
 	section   = app.Flag("section", "Set a config section name.").Default("example_section").String()
 	timeout   = app.Flag("timeout", "Set a timeout value. e.g. 5s").Default("10s").Duration()
 	id        = app.Flag("id", "Set an ID.").Default("0").Uint()

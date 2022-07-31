@@ -65,10 +65,11 @@ var (
 	}
 )
 
+// prepareDB prepares a DB.
 func prepareDB(t *testing.T, dbType, sqlPath string) {
 	t.Helper()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
 	defer cancel()
 
 	query, err := os.ReadFile(sqlPath)
@@ -96,6 +97,7 @@ func prepareDB(t *testing.T, dbType, sqlPath string) {
 	}
 }
 
+// wantConfig returns the Config that tests expect.
 func wantedConfig(t *testing.T, dbType string) *dbutil.Config {
 	t.Helper()
 

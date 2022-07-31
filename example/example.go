@@ -1,3 +1,4 @@
+// An example package to operate MySQL and PostgreSQL.
 package example
 
 import (

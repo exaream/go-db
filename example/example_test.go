@@ -283,7 +283,7 @@ func TestExec(t *testing.T) {
 
 			cond := example.NewCond(tt.id, non, active)
 			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
 			t.Cleanup(cancel)
 
 			ex, err := example.NewExecutor(ctx, cfg)
@@ -320,7 +320,7 @@ func TestExecErr(t *testing.T) {
 
 			cond := example.NewCond(tt.id, non, active)
 			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
 			t.Cleanup(cancel)
 
 			ex, err := example.NewExecutor(ctx, cfg)
@@ -356,7 +356,7 @@ func TestTeardown(t *testing.T) {
 
 			cond := example.NewCond(tt.id, non, active)
 			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
 			t.Cleanup(cancel)
 
 			ex, err := example.NewExecutor(ctx, cfg)
@@ -392,7 +392,7 @@ func TestTeardownErr(t *testing.T) {
 
 			cond := example.NewCond(tt.id, non, active)
 			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
 			t.Cleanup(cancel)
 
 			ex, err := example.NewExecutor(ctx, cfg)

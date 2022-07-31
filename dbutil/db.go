@@ -1,3 +1,4 @@
+// A utility package for DB operations.
 package dbutil
 
 import (
@@ -121,6 +122,7 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 	return cfg, nil
 }
 
+// dataSrcMySQL returns data source name for MySQL.
 func (cfg *Config) dataSrcMySQL() string {
 	dsn := fmt.Sprintf("%s:%s@%s(%s:%d)/%s",
 		cfg.Username, cfg.Password, cfg.Protocol, cfg.Host, cfg.Port, cfg.Database)
@@ -131,6 +133,7 @@ func (cfg *Config) dataSrcMySQL() string {
 	return dsn + "?" + params.Encode()
 }
 
+// dataSrcPgSQL returns data source name for PostgreSQL.
 func (cfg *Config) dataSrcPgSQL() string {
 	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s", // TODO: sslmode
 		cfg.Host, cfg.Port, cfg.Username, cfg.Database, cfg.Password)

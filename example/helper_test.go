@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	cfgTyp           = "ini"
+	cfgType          = "ini"
 	cfgSection       = "example_test_section"
 	queryTruncateTbl = `TRUNCATE TABLE users;`
 
@@ -22,7 +22,7 @@ const (
 
 var (
 	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example")
-	cfgPath       = filepath.Join(testDir, "test.dsn")
+	cfgPath       = filepath.Join(testDir, "pgsql.dsn")
 	beforeSqlPath = filepath.Join(testDir, "before_update.sql")
 	afterSqlPath  = filepath.Join(testDir, "after_update.sql")
 )
@@ -36,7 +36,7 @@ func prepareDB(t *testing.T, sqlPath string) {
 		t.Fatal(err)
 	}
 
-	cfg := dbutil.NewConfigFile(cfgTyp, cfgPath, cfgSection)
+	cfg := dbutil.NewConfigFile(cfgType, cfgPath, cfgSection)
 
 	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {

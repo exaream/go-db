@@ -3,7 +3,7 @@
 MAKEFILE_DIR := $(shell pwd)
 CMD_DIR := $(MAKEFILE_DIR)/cmd/example
 MYSQL_DIR := $(MAKEFILE_DIR)/_local/mysql/storage
-POSTGRES_DIR := $(MAKEFILE_DIR)/_local/postgres/storage
+POSTGRES_DIR := $(MAKEFILE_DIR)/_local/pgsql/storage
 PGADMIN_DIR := $(MAKEFILE_DIR)/_local/pgadmin/
 
 ############################################

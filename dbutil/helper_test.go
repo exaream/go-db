@@ -111,13 +111,13 @@ func wantedConfig(t *testing.T, dbType string) *dbutil.Config {
 	}
 
 	switch dbType {
-	case "mysql":
+	case mysqlDBType:
 		cfg.Host = mysqlHost
 		cfg.Port = mysqlPort
 		cfg.Driver = mysqlDriver
 		cfg.Src = dbutil.ExportDataSrcMySQL(cfg)
 		return cfg
-	case "pgsql":
+	case pgsqlDBType:
 		cfg.Host = pgsqlHost
 		cfg.Port = pgsqlPort
 		cfg.Driver = pgsqlDriver

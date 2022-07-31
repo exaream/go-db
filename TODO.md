@@ -11,7 +11,7 @@
 - [x] Multiple DBs for testing each package
 - [x] Support PostgreSQL
 - [x] Change test cases to DB switchable form
-- [ ] Reduce switch clause
-- [ ] Add test cases for PostgreSQL
+- [x] Reduce switch clause
+- [x] Add test cases for PostgreSQL
 - [ ] Fix after review
 

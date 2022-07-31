@@ -21,7 +21,13 @@ $ go run main.go --init --path=pgsql.dsn
 Run unit tests in Docker container.
 ```shell
 $ cd /go/src/work/
-$ go test ./... -count=1
+$ go test ./... -count=1 -shuffle=on
+```
+Output coverage.
+```shell
+$ cd /go/src/work/
+$ go test ./... -count=1 -coverprofile=cover.out
+$ go tool cover -html=cover.out -o cover.html
 ```
 
 ## Usage

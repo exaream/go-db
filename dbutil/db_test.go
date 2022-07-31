@@ -247,7 +247,7 @@ func TestSelectContext(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			want := 1
+			want := 1 // record
 			args := map[string]any{"id": 1, "status": non}
 			list, err := dbutil.SelectContext[user](ctx, db, querySelect, args)
 			if err != nil {
@@ -292,7 +292,7 @@ func TestSelectTxContext(t *testing.T) {
 				}
 			})
 
-			want := 1
+			want := 1 // record
 			args := map[string]any{"id": 1, "status": non}
 			list, err := dbutil.SelectTxContext[user](ctx, tx, querySelect, args)
 			if err != nil {
@@ -374,7 +374,7 @@ func TestBulkInsertTxContext(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			var min, max, chunkSize uint = 1, 10, 10
+			var min, max, chunkSize uint = 1, 5000, 1000
 			tx := db.MustBeginTx(ctx, nil)
 
 			num, err := dbutil.BulkInsertTxContext(ctx, tx, fakeUsers, queryInsert, min, max, chunkSize)

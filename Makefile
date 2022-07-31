@@ -1,9 +1,9 @@
-.PHONY: install up login down clean build test cover
+.PHONY: install up login down clean build test shuffle cover
 
 MAKEFILE_DIR := $(shell pwd)
 CMD_DIR := $(MAKEFILE_DIR)/cmd/example
 MYSQL_DIR := $(MAKEFILE_DIR)/_local/mysql/storage
-POSTGRES_DIR := $(MAKEFILE_DIR)/_local/postgres/storage
+POSTGRES_DIR := $(MAKEFILE_DIR)/_local/pgsql/storage
 PGADMIN_DIR := $(MAKEFILE_DIR)/_local/pgadmin/
 
 ############################################
@@ -42,6 +42,9 @@ build:
 
 test:
 	go test ./... -count=1
+
+shuffle:
+	go test ./... -count=1 -shuffle=on
 
 cover:
 	go test ./... -count=1 -coverprofile=cover.out

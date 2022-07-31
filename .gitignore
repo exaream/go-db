@@ -17,5 +17,5 @@
 cover.html
 _local/mysql/storage
 _local/pgadmin/
-_local/postgres/storage
+_local/pgsql/storage
 !.gitkeep

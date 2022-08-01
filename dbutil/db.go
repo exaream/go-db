@@ -16,7 +16,6 @@ import (
 	"go.uber.org/multierr"
 )
 
-// Timezone
 const (
 	defaultTz = "Asia/Tokyo"
 	// MySQL

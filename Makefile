@@ -1,4 +1,4 @@
-.PHONY: install up login down clean build test shuffle cover
+.PHONY: setup up login down clean build test shuffle cover
 
 MAKEFILE_DIR := $(shell pwd)
 CMD_DIR := $(MAKEFILE_DIR)/cmd/example
@@ -10,7 +10,7 @@ PGADMIN_DIR := $(MAKEFILE_DIR)/_local/pgadmin/
 # Run outside of Docker container.
 ############################################
 
-install:
+setup:
 	docker compose up -d --build
 
 up:

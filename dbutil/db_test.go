@@ -10,17 +10,8 @@ import (
 
 // Schema of users table
 // Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
-type user struct {
+type User struct {
 	ID        uint       `db:"id"`
-	Name      string     `db:"name"`
-	Email     string     `db:"email"`
-	Status    uint       `db:"status"`
-	CreatedAt *time.Time `db:"created_at"`
-	UpdatedAt *time.Time `db:"updated_at"`
-}
-
-// TODO: Confirm that whether it is possible to use user struct without ID.
-type userWithoutID struct {
 	Name      string     `db:"name"`
 	Email     string     `db:"email"`
 	Status    uint       `db:"status"`
@@ -84,7 +75,7 @@ func TestParseConfig(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			want := wantedConfig(t, tt.dbType)
+			want := expectedConfig(t, tt.dbType)
 			got, err := dbutil.ParseConfig(cfgType, tt.path, cfgSection)
 			if err != nil {
 				t.Fatal(err)
@@ -211,9 +202,9 @@ func TestOpenContextErr(t *testing.T) {
 
 			switch tt.dbType {
 			case mysqlDBType:
-				cfg.Src = dbutil.ExportDataSrcMySQL(cfg)
+				cfg.DataSrc = dbutil.ExportDataSrcMySQL(cfg)
 			case pgsqlDBType:
-				cfg.Src = dbutil.ExportDataSrcPgSQL(cfg)
+				cfg.DataSrc = dbutil.ExportDataSrcPgSQL(cfg)
 			}
 
 			if _, err := dbutil.OpenContext(ctx, cfg); err == nil {
@@ -249,7 +240,7 @@ func TestSelectContext(t *testing.T) {
 
 			want := 1 // record
 			args := map[string]any{"id": 1, "status": non}
-			list, err := dbutil.SelectContext[user](ctx, db, querySelect, args)
+			list, err := dbutil.SelectContext[User](ctx, db, querySelect, args)
 			if err != nil {
 				t.Error(err)
 			}
@@ -294,7 +285,7 @@ func TestSelectTxContext(t *testing.T) {
 
 			want := 1 // record
 			args := map[string]any{"id": 1, "status": non}
-			list, err := dbutil.SelectTxContext[user](ctx, tx, querySelect, args)
+			list, err := dbutil.SelectTxContext[User](ctx, tx, querySelect, args)
 			if err != nil {
 				t.Error(err)
 			}

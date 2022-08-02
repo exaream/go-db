@@ -39,14 +39,6 @@ type User struct {
 	UpdatedAt *time.Time `db:"updated_at"`
 }
 
-type UserWithoutID struct {
-	Name      string     `db:"name"`
-	Email     string     `db:"email"`
-	Status    int        `db:"status"`
-	CreatedAt *time.Time `db:"created_at"`
-	UpdatedAt *time.Time `db:"updated_at"`
-}
-
 // User's stringer.
 func (u User) String() string {
 	return fmt.Sprintf("%d\t%s\t%v\t%s\t%s", u.ID, u.Name, u.Status, u.CreatedAt.Format(layout), u.UpdatedAt.Format(layout))
@@ -151,18 +143,18 @@ func Init(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize uint)
 	return total, nil
 }
 
-// TODO: Confirm how to use Generics to specify a type of return value.
-func fakeUsers(min, max uint) (list []User) {
+// fakeUsers returns fake user list.
+func fakeUsers(min, max uint) (users []User) {
 	if min == 0 || max == 0 {
-		return list
+		return users
 	}
 
 	now := time.Now()
 	for i := min; i <= max; i++ {
-		list = append(list, User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
+		users = append(users, User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
 	}
 
-	return list
+	return users
 }
 
 // prepare runs SELECT clause before update.

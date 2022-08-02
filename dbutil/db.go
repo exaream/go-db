@@ -43,10 +43,8 @@ type Config struct {
 	Port     uint16 // 1~65535
 	Protocol string
 	Tz       string
-
-	// TODO: Confirm remaining in Config or removing from Config
-	Driver string
-	Src    string
+	Driver   string
+	DataSrc  string
 }
 
 // NewDBContext returns DB handle.
@@ -110,10 +108,10 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 	switch cfg.Type {
 	case mysqlDBType:
 		cfg.Driver = mysqlDriver
-		cfg.Src = cfg.dataSrcMySQL()
+		cfg.DataSrc = cfg.dataSrcMySQL()
 	case pgsqlDBType:
 		cfg.Driver = pgsqlDriver
-		cfg.Src = cfg.dataSrcPgSQL()
+		cfg.DataSrc = cfg.dataSrcPgSQL()
 	default:
 		return nil, errors.New("Unsupported DB type")
 	}
@@ -141,7 +139,7 @@ func (cfg *Config) dataSrcPgSQL() string {
 // OpenContext returns DB handle.
 // See: http://dsas.blog.klab.org/archives/52191467.html
 func OpenContext(ctx context.Context, cfg *Config) (db *sqlx.DB, err error) {
-	db, err = sqlx.Open(cfg.Driver, cfg.Src)
+	db, err = sqlx.Open(cfg.Driver, cfg.DataSrc)
 
 	if err != nil {
 		return nil, err

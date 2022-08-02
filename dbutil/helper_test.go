@@ -97,8 +97,8 @@ func prepareDB(t *testing.T, dbType, sqlPath string) {
 	}
 }
 
-// wantConfig returns the Config that tests expect.
-func wantedConfig(t *testing.T, dbType string) *dbutil.Config {
+// expectedConfig returns the Config that tests expect.
+func expectedConfig(t *testing.T, dbType string) *dbutil.Config {
 	t.Helper()
 
 	cfg := &dbutil.Config{
@@ -115,13 +115,13 @@ func wantedConfig(t *testing.T, dbType string) *dbutil.Config {
 		cfg.Host = mysqlHost
 		cfg.Port = mysqlPort
 		cfg.Driver = mysqlDriver
-		cfg.Src = dbutil.ExportDataSrcMySQL(cfg)
+		cfg.DataSrc = dbutil.ExportDataSrcMySQL(cfg)
 		return cfg
 	case pgsqlDBType:
 		cfg.Host = pgsqlHost
 		cfg.Port = pgsqlPort
 		cfg.Driver = pgsqlDriver
-		cfg.Src = dbutil.ExportDataSrcPgSQL(cfg)
+		cfg.DataSrc = dbutil.ExportDataSrcPgSQL(cfg)
 		return cfg
 	default:
 		return nil
@@ -129,16 +129,15 @@ func wantedConfig(t *testing.T, dbType string) *dbutil.Config {
 }
 
 // fakeUsers returns fake user list.
-// TODO: Confirm how to pass *testing.T as an argument.
-func fakeUsers(min, max uint) (list []userWithoutID) {
+func fakeUsers(min, max uint) (users []User) {
 	if min == 0 || max == 0 {
-		return list
+		return users
 	}
 
 	now := time.Now()
 	for i := min; i <= max; i++ {
-		list = append(list, userWithoutID{gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
+		users = append(users, User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
 	}
 
-	return list
+	return users
 }

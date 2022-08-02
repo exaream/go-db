@@ -11,7 +11,6 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	// TODO: Confirm how to use *testing.T in this method.
 	initDB(mysqlDBType, beforeSqlPath)
 	initDB(pgsqlDBType, beforeSqlPath)
 	m.Run()

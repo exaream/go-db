@@ -46,7 +46,7 @@ const (
 
 	// Query
 	queryInsert = `INSERT INTO users (name, email, status, created_at, updated_at) 
-VALUES (:name, :email, :status, :created_at, :updated_at)`
+VALUES (:name, :email, :status, :created_at, :updated_at);`
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
 )
@@ -61,8 +61,8 @@ var (
 
 	// Query
 	queryTruncateTbls = map[string]string{
-		mysqlDriver: `TRUNCATE TABLE users`,
-		pgsqlDriver: `TRUNCATE TABLE users RESTART IDENTITY`,
+		mysqlDriver: `TRUNCATE TABLE users;`,
+		pgsqlDriver: `TRUNCATE TABLE users RESTART IDENTITY;`,
 	}
 )
 

@@ -57,7 +57,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		fmt.Printf("Successfully generated %d records as initial data.\n", total)
+		fmt.Printf("succeeded to generate %d records as initial data.\n", total)
 		os.Exit(0)
 	}
 

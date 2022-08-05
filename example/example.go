@@ -20,13 +20,21 @@ const (
 	// Layout of "Y-m-d H:i:s"
 	layout = "2006-01-02 15:04:05"
 
+	// Driver
+	mysqlDriver = "mysql"
+	pgsqlDriver = "pgx"
+
 	// SQL
-	queryTruncateTbl = `TRUNCATE TABLE users`
-	querySelect      = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
-	queryInsert      = `INSERT INTO users (name, email, status, created_at, updated_at) 
+	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
+	queryInsert = `INSERT INTO users (name, email, status, created_at, updated_at) 
 VALUES (:name, :email, :status, :created_at, :updated_at)`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
 )
+
+var queryTruncateTbls = map[string]string{
+	mysqlDriver: `TRUNCATE TABLE users`,
+	pgsqlDriver: `TRUNCATE TABLE users RESTART IDENTITY`,
+}
 
 // Schema of users table
 // Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
@@ -126,6 +134,7 @@ func Init(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize uint)
 	}()
 
 	tx := db.MustBeginTx(ctx, nil)
+	queryTruncateTbl := queryTruncateTbls[db.DriverName()]
 
 	if _, err := tx.ExecContext(ctx, queryTruncateTbl); err != nil {
 		return 0, multierr.Append(err, tx.Rollback())

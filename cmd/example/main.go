@@ -23,15 +23,15 @@ const (
 
 // Arguments
 var (
-	app       = kingpin.New("example", "An example command made of Go to operate MySQL.")
-	initFlg   = app.Flag("init", "Set true if you want to initialize data").Default("false").Bool()
-	typ       = app.Flag("type", "Set a config type.").Default("ini").String()
-	path      = app.Flag("path", "Set a config file path.").Default("mysql.dsn").String()
-	section   = app.Flag("section", "Set a config section name.").Default("example_section").String()
-	timeout   = app.Flag("timeout", "Set a timeout value. e.g. 5s").Default("10s").Duration()
-	id        = app.Flag("id", "Set an ID.").Default("0").Uint()
-	beforeSts = app.Flag("before-sts", "Set a before status.").Default("0").Uint()
-	afterSts  = app.Flag("after-sts", "Set a after status.").Default("0").Uint()
+	app         = kingpin.New("example", "An example command made of Go to operate MySQL.")
+	typ         = app.Flag("type", "Set a config type.").Default("ini").String()
+	path        = app.Flag("path", "Set a config file path.").Default("mysql.dsn").String()
+	section     = app.Flag("section", "Set a config section name.").Default("example_section").String()
+	timeout     = app.Flag("timeout", "Set a timeout value. e.g. 5s").Default("10s").Duration()
+	id          = app.Flag("id", "Set an ID.").Default("0").Uint()
+	beforeSts   = app.Flag("before-sts", "Set a before status.").Default("0").Uint()
+	afterSts    = app.Flag("after-sts", "Set a after status.").Default("0").Uint()
+	initDataFlg = app.Flag("init-data", "Set true if you want to initialize data").Default("false").Bool()
 )
 
 func init() {
@@ -51,13 +51,13 @@ func main() {
 	cond := example.NewCond(*id, *beforeSts, *afterSts)
 
 	// Generate initial data.
-	if *initFlg {
+	if *initDataFlg {
 		total, err := example.Init(ctx, cfg, min, max, chunkSize)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		fmt.Printf("Successfully generated %d records as initial data.\n", total)
+		fmt.Printf("succeeded to generate %d records as initial data.\n", total)
 		os.Exit(0)
 	}
 

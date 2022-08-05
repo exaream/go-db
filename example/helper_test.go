@@ -16,9 +16,8 @@ const (
 	active  = 1
 	non     = 0
 
-	cfgType          = "ini"
-	cfgSection       = "example_test_section"
-	queryTruncateTbl = `TRUNCATE TABLE users;`
+	cfgType    = "ini"
+	cfgSection = "example_test_section"
 
 	// Config MySQL
 	mysqlHost   = "go_db_mysql"
@@ -52,8 +51,8 @@ var (
 
 	// Query
 	queryTruncateTbls = map[string]string{
-		"mysql": `TRUNCATE TABLE users`,
-		"pgsql": `TRUNCATE TABLE users RESTART IDENTITY`,
+		mysqlDriver: `TRUNCATE TABLE users`,
+		pgsqlDriver: `TRUNCATE TABLE users RESTART IDENTITY`,
 	}
 )
 
@@ -78,7 +77,8 @@ func prepareDB(t *testing.T, dbType, sqlPath string) {
 	}
 
 	args := make(map[string]any)
-	_, err = sqlx.NamedExecContext(ctx, db, queryTruncateTbls[dbType], args)
+	queryTruncateTbl := queryTruncateTbls[db.DriverName()]
+	_, err = sqlx.NamedExecContext(ctx, db, queryTruncateTbl, args)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +107,8 @@ func initDB(dbType, sqlPath string) error {
 	}
 
 	args := make(map[string]any)
-	if _, err = sqlx.NamedExecContext(ctx, db, queryTruncateTbls[dbType], args); err != nil {
+	queryTruncateTbl := queryTruncateTbls[db.DriverName()]
+	if _, err = sqlx.NamedExecContext(ctx, db, queryTruncateTbl, args); err != nil {
 		return err
 	}
 	if _, err = sqlx.NamedExecContext(ctx, db, string(query), args); err != nil {

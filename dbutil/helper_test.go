@@ -61,8 +61,8 @@ var (
 
 	// Query
 	queryTruncateTbls = map[string]string{
-		"mysql": `TRUNCATE TABLE users`,
-		"pgsql": `TRUNCATE TABLE users RESTART IDENTITY`,
+		mysqlDriver: `TRUNCATE TABLE users`,
+		pgsqlDriver: `TRUNCATE TABLE users RESTART IDENTITY`,
 	}
 )
 
@@ -86,8 +86,9 @@ func prepareDB(t *testing.T, dbType, sqlPath string) {
 		t.Fatal(err)
 	}
 
+	queryTruncateTbl := queryTruncateTbls[db.DriverName()]
 	args := make(map[string]any)
-	_, err = sqlx.NamedExecContext(ctx, db, queryTruncateTbls[dbType], args)
+	_, err = sqlx.NamedExecContext(ctx, db, queryTruncateTbl, args)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -43,6 +43,7 @@ type Config struct {
 	Port     uint16 // 1~65535
 	Protocol string
 	Tz       string
+	SSLMode  string // for PostgreSQL
 	Driver   string
 	DataSrc  string
 }
@@ -132,8 +133,8 @@ func (cfg *Config) dataSrcMySQL() string {
 
 // dataSrcPgSQL returns data source name for PostgreSQL.
 func (cfg *Config) dataSrcPgSQL() string {
-	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s", // TODO: sslmode
-		cfg.Host, cfg.Port, cfg.Username, cfg.Database, cfg.Password)
+	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=%s",
+		cfg.Host, cfg.Port, cfg.Username, cfg.Database, cfg.Password, cfg.SSLMode)
 }
 
 // OpenContext returns DB handle.

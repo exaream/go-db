@@ -26,6 +26,7 @@ const (
 	cfgPassword = "examplepasswd"
 	cfgProtocol = "tcp"
 	cfgTz       = "Asia/Tokyo"
+	cfgSSLMode  = "disable" // for PostgreSQL
 
 	// Config MySQL
 	mysqlHost   = "go_db_mysql"
@@ -122,6 +123,7 @@ func expectedConfig(t *testing.T, dbType string) *dbutil.Config {
 		cfg.Port = pgsqlPort
 		cfg.Driver = pgsqlDriver
 		cfg.DataSrc = dbutil.ExportDataSrcPgSQL(cfg)
+		cfg.SSLMode = cfgSSLMode
 		return cfg
 	default:
 		return nil

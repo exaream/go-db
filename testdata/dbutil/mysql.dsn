@@ -1,10 +1,10 @@
 ; The following is the DB connection info for a local/test env.
 ; Never use the following in your production env.
 
-[test_example_section]
+[test_dbutil_section]
 type     = mysql
 host     = go_db_mysql
-database = test_example_db
+database = test_dbutil_db
 username = exampleuser
 password = "ZXhhbXBsZXBhc3N3ZA==" ; base64-encoded value of "examplepasswd"
 protocol = tcp

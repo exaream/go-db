@@ -17,7 +17,7 @@ const (
 	non     = 0
 
 	cfgType    = "ini"
-	cfgSection = "example_test_section"
+	cfgSection = "test_example_section"
 
 	// Config MySQL
 	mysqlHost   = "go_db_mysql"

@@ -23,7 +23,7 @@ const (
 
 // Arguments
 var (
-	app         = kingpin.New("example", "An example command made of Go to operate MySQL.")
+	app         = kingpin.New("example", "An example command made of Go to operate MySQL and PostgreSQL.")
 	typ         = app.Flag("type", "Set a config type.").Default("ini").String()
 	path        = app.Flag("path", "Set a config file path.").Default("mysql.dsn").String()
 	section     = app.Flag("section", "Set a config section name.").Default("example_section").String()

@@ -1,7 +1,7 @@
 # Go DB
 
 ## Overview
-A tool made of Go for operating MySQL and PostgreSQL.
+`dbutil` package is a tool made of Go for operating MySQL and PostgreSQL.
 
 ## Setup
 The following command builds some Docker container and generates `users` table in MySQL and PostgreSQL.

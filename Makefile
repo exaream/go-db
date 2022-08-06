@@ -1,8 +1,8 @@
 MAKEFILE_DIR := $(shell pwd)
 CMD_DIR := $(MAKEFILE_DIR)/cmd/example
-MYSQL_DIR := $(MAKEFILE_DIR)/_local/mysql/storage
-POSTGRES_DIR := $(MAKEFILE_DIR)/_local/pgsql/storage
-PGADMIN_DIR := $(MAKEFILE_DIR)/_local/pgadmin/
+MYSQL_DIR := $(MAKEFILE_DIR)/_development/mysql/storage
+POSTGRES_DIR := $(MAKEFILE_DIR)/_development/pgsql/storage
+PGADMIN_DIR := $(MAKEFILE_DIR)/_development/pgadmin/
 
 ############################################
 # Run outside of go_db_app container.

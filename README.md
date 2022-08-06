@@ -2,8 +2,7 @@
 
 ## Overview
 
-`dbutil` package is Go's CLI tool for operating MySQL and PostgreSQL.  
-`example` package is a sample for updating `status` column of `users` table. 
+`dbutil` package is Go's CLI tool for operating MySQL and PostgreSQL.
 
 ## Install
 
@@ -11,7 +10,7 @@ Build some Docker containers and generate `users` table in MySQL and PostgreSQL.
 ```shell
 $ git clone https://github.com/exaream/go-db.git
 $ cd go-db
-$ docker-compose up --build -d
+$ docker compose up -d --build
 ```
 
 Login `go_db_app` container for using Go.
@@ -30,8 +29,9 @@ $ go run main.go --setup --path=pgsql.dsn
 
 ## Usage
 
-### Sample
- 
+### Example
+
+`example` package is a simple tool for updating `status` column of `users` table.  
 Move to the following directory in `go_db_app` container.
 ```shell
 $ cd /go/src/work/cmd/example

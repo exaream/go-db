@@ -20,8 +20,8 @@ const (
 
 	// Config Common
 	cfgType     = "ini"
-	cfgSection  = "dbutil_test_section"
-	cfgDatabase = "example_db_dbutil_pkg_test"
+	cfgSection  = "test_dbutil_section"
+	cfgDatabase = "test_dbutil_db"
 	cfgUsername = "exampleuser"
 	cfgPassword = "examplepasswd"
 	cfgProtocol = "tcp"
@@ -53,7 +53,7 @@ VALUES (:name, :email, :status, :created_at, :updated_at);`
 
 var (
 	// Path
-	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example")
+	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "dbutil")
 	mysqlCfgPath  = filepath.Join(testDir, "mysql.dsn")
 	pgsqlCfgPath  = filepath.Join(testDir, "pgsql.dsn")
 	beforeSqlPath = filepath.Join(testDir, "before_update.sql")

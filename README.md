@@ -1,9 +1,11 @@
 # Go DB
 
 ## Overview
+
 `dbutil` package is Go's CLI tool for operating MySQL and PostgreSQL.
 
-## Setup
+## Install
+
 Build some Docker containers and generate `users` table in MySQL and PostgreSQL.
 ```shell
 $ git clone https://github.com/exaream/go-db.git
@@ -14,6 +16,8 @@ Login `go_db_app` container for using Go.
 ```shell
 $ docker exec -it go_db_app sh
 ```
+
+## Setup initial data
 Generate initial data in Docker containers as you like.
 ```shell
 $ cd /go/src/work/cmd/example
@@ -21,24 +25,11 @@ $ go run main.go --setup --path=mysql.dsn
 $ go run main.go --setup --path=pgsql.dsn
 ```
 
-## Test
-Move to the working directory in `go_db_app` container.
-```shell
-$ cd /go/src/work/
-```
-Run unit tests in Docker container.
-(Can NOT use `-race` option due to DB conflict)
-```shell
-$ go test ./... -count=1 -shuffle=on
-```
-Output coverage.
-```shell
-$ go test ./... -count=1 -coverprofile=cover.out
-$ go tool cover -html=cover.out -o cover.html
-```
-
 ## Usage
-`example` package is a tool for updating `status` column of `users` table.  
+
+### Sample
+
+`example` package is a sample for updating `status` column of `users` table.  
 Move to the following directory in `go_db_app` container.
 ```shell
 $ cd /go/src/work/cmd/example
@@ -79,7 +70,7 @@ Use all arguments
 $ go run main.go --type=ini --path=mysql.dsn --section=example_section --timeout=5s --id=1 --before-sts=0 --after-sts=1
 ```
 
-## DB
+### DB
 
 Access MySQL directly
 ```shell
@@ -100,6 +91,22 @@ Access phpMyAdmin
 Aaccess pgAdmin
 1. Check login info of `pgadmin@example.com` in `docker-compose.yml`
 2. Access [http://localhost:8888/](http://localhost:8888/)
+
+## Test
+Move to the working directory in `go_db_app` container.
+```shell
+$ cd /go/src/work/
+```
+Run unit tests in Docker container.
+(Can NOT use `-race` option due to DB conflict)
+```shell
+$ go test ./... -count=1 -shuffle=on
+```
+Output coverage.
+```shell
+$ go test ./... -count=1 -coverprofile=cover.out
+$ go tool cover -html=cover.out -o cover.html
+```
 
 ## TODO
 * Create a mechanism to avoid DB conflicts during testing by referring to [spool](https://github.com/cloudspannerecosystem/spool).

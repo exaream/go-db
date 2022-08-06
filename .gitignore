@@ -15,7 +15,7 @@
 # vendor/
 
 cover.html
-_local/mysql/storage
-_local/pgadmin/
-_local/pgsql/storage
+_development/mysql/storage
+_development/pgadmin/
+_development/pgsql/storage
 !.gitkeep

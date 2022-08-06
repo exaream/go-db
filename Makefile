@@ -5,7 +5,7 @@ POSTGRES_DIR := $(MAKEFILE_DIR)/_local/pgsql/storage
 PGADMIN_DIR := $(MAKEFILE_DIR)/_local/pgadmin/
 
 ############################################
-# Run outside of Docker container.
+# Run outside of go_db_app container.
 ############################################
 .PHONY: setup
 setup:
@@ -36,7 +36,7 @@ clean:
 	touch $(PGADMIN_DIR)/.gitkeep
 
 ############################################
-# Run inside of Docker container.
+# Run inside of go_db_app container.
 ############################################
 .PHONY: init-data
 init-data:

@@ -111,7 +111,7 @@ func TestNewExecutor(t *testing.T) {
 	}
 }
 
-func TestInit(t *testing.T) {
+func TestSetup(t *testing.T) {
 	cases := map[string]struct {
 		dbType    string
 		path      string
@@ -153,7 +153,7 @@ func TestInit(t *testing.T) {
 				}
 			})
 
-			got, err := example.Init(ctx, cfg, tt.min, tt.max, tt.chunkSize)
+			got, err := example.Setup(ctx, cfg, tt.min, tt.max, tt.chunkSize)
 			if err != nil {
 				t.Error(err)
 			}

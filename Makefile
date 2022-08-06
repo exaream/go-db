@@ -8,8 +8,8 @@ PGADMIN_DIR := $(MAKEFILE_DIR)/_development/pgadmin
 ############################################
 # Run outside of go_db_app container.
 ############################################
-.PHONY: setup
-setup:
+.PHONY: install
+install:
 	docker compose up -d --build
 
 .PHONY: up
@@ -39,10 +39,10 @@ clean:
 ############################################
 # Run inside of go_db_app container.
 ############################################
-.PHONY: init-data
-init-data:
-	go run $(CMD_DIR)/main.go --init-data --path=$(CMD_DIR)/mysql.dsn
-	go run $(CMD_DIR)/main.go --init-data --path=$(CMD_DIR)/pgsql.dsn
+.PHONY: setup
+setup:
+	go run $(CMD_DIR)/main.go --setup --path=$(CMD_DIR)/mysql.dsn
+	go run $(CMD_DIR)/main.go --setup --path=$(CMD_DIR)/pgsql.dsn
 
 .PHONY: build
 build:

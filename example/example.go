@@ -120,8 +120,8 @@ func NewExecutor(ctx context.Context, cfg *dbutil.ConfigFile) (*Executor, error)
 	}, nil
 }
 
-// init initialize sample data
-func Init(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize uint) (total int64, err error) {
+// Setup generates initial data.
+func Setup(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize uint) (total int64, err error) {
 	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {
 		return 0, err

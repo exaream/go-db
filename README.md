@@ -16,7 +16,7 @@ $ docker exec -it go_db_app sh
 ```
 Generate initial data in Docker container as you like.
 ```shell
-$ cd /go/src/work/cmd/example
+$ cd /go/src/work/_examples/example
 $ go run main.go --init-data --path=mysql.dsn
 $ go run main.go --init-data --path=pgsql.dsn
 ```

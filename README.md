@@ -83,4 +83,4 @@ Aaccess pgAdmin
 2. Access [http://localhost:8888/](http://localhost:8888/)
 
 ## TODO
-* Create a mechanism to avoid DB conflicts for MySQL and PostgreSQL by referring to [spool](https://github.com/cloudspannerecosystem/spool).
+* Create a mechanism to avoid DB conflicts during testing by referring to [spool](https://github.com/cloudspannerecosystem/spool).

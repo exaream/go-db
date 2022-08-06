@@ -3,7 +3,9 @@ services:
 
   go_db_app:
     container_name: go_db_app
-    build: .
+    build:
+      context: .
+      dockerfile: ./_local/app/setup/Dockerfile
     tty: true
     volumes:
       - .:/go/src/work
@@ -16,7 +18,7 @@ services:
     volumes:
       - ./_local/pgsql/setup/db:/docker-entrypoint-initdb.d
       - ./_local/pgsql/setup/table:/docker-entrypoint-initdb.d/ddl
-      - ./_local/pgsql/storage:/var/lib/pgsql/data
+      - ./_local/pgsql/storage/data:/var/lib/pgsql/data
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=exampleuser
@@ -43,9 +45,12 @@ services:
 
   go_db_mysql:
     container_name: go_db_mysql
-    image: mysql:8
+    build:
+      context: .
+      dockerfile: ./_local/mysql/setup/Dockerfile
     volumes:
-      - ./_local/mysql/storage:/var/lib/mysql
+      - ./_local/mysql/storage/data:/var/lib/mysql
+      - ./_local/mysql/storage/log:/var/log/mysql
       - ./_local/mysql/setup/conf:/etc/mysql/conf.d
       - ./_local/mysql/setup/db:/docker-entrypoint-initdb.d
       - ./_local/mysql/setup/table:/docker-entrypoint-initdb.d/ddl

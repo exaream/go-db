@@ -38,25 +38,25 @@ $ go tool cover -html=cover.out -o cover.html
 ## Usage
 Show help
 ```shell
-$ cd /go/src/work/cmd/example
+$ cd /go/src/work/_examples/example
 $ go run main.go --help
 ```
 
 Show version
 ```shell
-$ cd /go/src/work/cmd/example
+$ cd /go/src/work/_examples/example
 $ go run main.go --version
 ```
 
 Use minimum arguments
 ```shell
-$ cd /go/src/work/cmd/example
+$ cd /go/src/work/_examples/example
 $ go run main.go --id=1 --before-sts=0 --after-sts=1
 ```
 
 Use all arguments
 ```shell
-$ cd /go/src/work/cmd/example
+$ cd /go/src/work/_examples/example
 $ go run main.go --type=ini --path=mysql.dsn --section=example_section --timeout=5s --id=1 --before-sts=0 --after-sts=1
 ```
 

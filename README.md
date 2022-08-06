@@ -4,7 +4,7 @@
 `dbutil` package is Go's CLI tool for operating MySQL and PostgreSQL.
 
 ## Setup
-Build some Docker containers and generates `users` table in MySQL and PostgreSQL.
+Build some Docker containers and generate `users` table in MySQL and PostgreSQL.
 ```shell
 $ git clone https://github.com/exaream/go-db.git
 $ cd go-db
@@ -22,7 +22,7 @@ $ go run main.go --setup --path=pgsql.dsn
 ```
 
 ## Test
-Move working directory in `go_db_app` container.
+Move to the working directory in `go_db_app` container.
 ```shell
 $ cd /go/src/work/
 ```
@@ -58,7 +58,7 @@ Flags:
   --id=0                       Set an ID.
   --before-sts=0               Set a before status.
   --after-sts=0                Set a after status.
-  --setup                  Set true if you want to initialize data.
+  --setup                      Set true if you want to initialize data.
   --version                    Show application version.
 
 ```

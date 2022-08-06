@@ -25,6 +25,3 @@ RUN go install github.com/kisielk/errcheck@latest && \
     curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest && \
     cd /go/src/work && \
     go mod tidy
-
-RUN cd /go/src/work/_examples/example && \
-    go mod tidy

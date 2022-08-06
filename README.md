@@ -16,7 +16,7 @@ $ docker exec -it go_db_app sh
 ```
 Generate initial data in Docker containers as you like.
 ```shell
-$ cd /go/src/work/_examples/example
+$ cd /go/src/work/cmd/example
 $ go run main.go --setup --path=mysql.dsn
 $ go run main.go --setup --path=pgsql.dsn
 ```
@@ -41,7 +41,7 @@ $ go tool cover -html=cover.out -o cover.html
 `example` package is a tool for updating `status` column of `users` table.  
 Move to the following directory in `go_db_app` container.
 ```shell
-$ cd /go/src/work/_examples/example
+$ cd /go/src/work/cmd/example
 ```
 Show help
 ```shell

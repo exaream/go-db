@@ -3,15 +3,8 @@ package example
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
-
-	"github.com/bxcodec/faker/v3"
-	"github.com/jmoiron/sqlx"
-	"github.com/mattn/go-gimei"
-	"go.uber.org/multierr"
-	"go.uber.org/zap"
 
 	"github.com/exaream/go-db/dbutil"
 )
@@ -91,137 +84,6 @@ func Run(ctx context.Context, cfg *dbutil.ConfigFile, cond *Cond) (rerr error) {
 
 	if err := ex.teardown(ctx, cond); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-// Executor has logger and db.
-type Executor struct {
-	Logger *zap.Logger
-	DB     *sqlx.DB
-}
-
-// NewExecutor returns Executor.
-func NewExecutor(ctx context.Context, cfg *dbutil.ConfigFile) (*Executor, error) {
-	db, err := dbutil.NewDBContext(ctx, cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	Logger, err := zap.NewDevelopment()
-	if err != nil {
-		return nil, err
-	}
-
-	return &Executor{
-		Logger: Logger,
-		DB:     db,
-	}, nil
-}
-
-// Setup generates initial data.
-func Setup(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize uint) (total int64, err error) {
-	db, err := dbutil.NewDBContext(ctx, cfg)
-	if err != nil {
-		return 0, err
-	}
-
-	defer func() {
-		if rerr := db.Close(); rerr != nil {
-			err = rerr
-		}
-	}()
-
-	tx := db.MustBeginTx(ctx, nil)
-	queryTruncateTbl := queryTruncateTbls[db.DriverName()]
-
-	if _, err := tx.ExecContext(ctx, queryTruncateTbl); err != nil {
-		return 0, multierr.Append(err, tx.Rollback())
-	}
-
-	total, err = dbutil.BulkInsertTxContext(ctx, tx, fakeUsers, queryInsert, min, max, chunkSize)
-	if err != nil {
-		return 0, multierr.Append(err, tx.Rollback())
-	}
-
-	if err := tx.Commit(); err != nil {
-		return 0, multierr.Append(err, tx.Rollback())
-	}
-
-	return total, nil
-}
-
-// fakeUsers returns fake user list.
-func fakeUsers(min, max uint) (users []User) {
-	if min == 0 || max == 0 {
-		return users
-	}
-
-	now := time.Now()
-	for i := min; i <= max; i++ {
-		users = append(users, User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
-	}
-
-	return users
-}
-
-// prepare runs SELECT clause before update.
-func (ex *Executor) prepare(ctx context.Context, cond *Cond) error {
-	args := map[string]any{"id": cond.id, "status": cond.beforeSts}
-	rows, err := dbutil.SelectContext[User](ctx, ex.DB, querySelect, args)
-	if err != nil {
-		return err
-	}
-
-	if len(rows) <= 0 {
-		return errors.New("there is no target rows")
-	}
-
-	return nil
-}
-
-// exec runs UPDATE and SELECT clause on the same transaction.
-func (ex *Executor) exec(ctx context.Context, cond *Cond) error {
-	tx := ex.DB.MustBeginTx(ctx, nil)
-
-	args := map[string]any{"id": cond.id, "beforeSts": cond.beforeSts, "afterSts": cond.afterSts}
-	num, err := dbutil.UpdateTxContext(ctx, tx, queryUpdate, args)
-	if err != nil {
-		return err
-	}
-
-	if num <= 0 {
-		return multierr.Append(errors.New("there is no affected rows"), tx.Rollback())
-	}
-
-	args = map[string]any{"id": cond.id, "status": cond.afterSts}
-	rows, err := dbutil.SelectTxContext[User](ctx, tx, querySelect, args)
-	if err != nil {
-		return err
-	}
-
-	if len(rows) <= 0 {
-		return multierr.Append(errors.New("there is no target rows"), tx.Rollback())
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// teardown runs SELECT clause after update.
-func (ex *Executor) teardown(ctx context.Context, cond *Cond) error {
-	args := map[string]any{"id": cond.id, "status": cond.afterSts}
-	rows, err := dbutil.SelectContext[User](ctx, ex.DB, querySelect, args)
-	if err != nil {
-		return err
-	}
-
-	if len(rows) <= 0 {
-		return errors.New("there is no affected rows")
 	}
 
 	return nil

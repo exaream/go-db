@@ -38,6 +38,7 @@ $ go tool cover -html=cover.out -o cover.html
 ```
 
 ## Usage
+`example` package is a tool for updating `status` column of `users` table.  
 Move to the following directory in `go_db_app` container.
 ```shell
 $ cd /go/src/work/_examples/example

@@ -48,7 +48,6 @@ services:
     build:
       context: .
       dockerfile: ./_local/mysql/setup/Dockerfile
-    image: mysql:8
     volumes:
       - ./_local/mysql/storage/data:/var/lib/mysql
       - ./_local/mysql/storage/log:/var/log/mysql

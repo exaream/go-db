@@ -1,10 +1,10 @@
 # Go DB
 
 ## Overview
-`dbutil` package is a tool made of Go for operating MySQL and PostgreSQL.
+`dbutil` package is Go's CLI tool for operating MySQL and PostgreSQL.
 
 ## Setup
-The following command builds some Docker container and generates `users` table in MySQL and PostgreSQL.
+Build some Docker containers and generates `users` table in MySQL and PostgreSQL.
 ```shell
 $ git clone https://github.com/exaream/go-db.git
 $ cd go-db
@@ -14,49 +14,67 @@ Login `go_db_app` container for using Go.
 ```shell
 $ docker exec -it go_db_app sh
 ```
-Generate initial data in Docker container as you like.
+Generate initial data in Docker containers as you like.
 ```shell
 $ cd /go/src/work/_examples/example
-$ go run main.go --init-data --path=mysql.dsn
-$ go run main.go --init-data --path=pgsql.dsn
+$ go run main.go --setup --path=mysql.dsn
+$ go run main.go --setup --path=pgsql.dsn
 ```
 
 ## Test
+Move working directory in `go_db_app` container.
+```shell
+$ cd /go/src/work/
+```
 Run unit tests in Docker container.
 (Can NOT use `-race` option due to DB conflict)
 ```shell
-$ cd /go/src/work/
 $ go test ./... -count=1 -shuffle=on
 ```
 Output coverage.
 ```shell
-$ cd /go/src/work/
 $ go test ./... -count=1 -coverprofile=cover.out
 $ go tool cover -html=cover.out -o cover.html
 ```
 
 ## Usage
-Show help
+Move to the following directory in `go_db_app` container.
 ```shell
 $ cd /go/src/work/_examples/example
+```
+Show help
+```shell
 $ go run main.go --help
+usage: example [<flags>]
+
+An example command made of Go to operate MySQL and PostgreSQL.
+
+Flags:
+  --help                       Show context-sensitive help (also try --help-long and --help-man).
+  --type="ini"                 Set a config type.
+  --path="mysql.dsn"           Set a config file path.
+  --section="example_section"  Set a config section name.
+  --timeout=10s                Set a timeout value. e.g. 5s
+  --id=0                       Set an ID.
+  --before-sts=0               Set a before status.
+  --after-sts=0                Set a after status.
+  --setup                  Set true if you want to initialize data.
+  --version                    Show application version.
+
 ```
 
 Show version
 ```shell
-$ cd /go/src/work/_examples/example
 $ go run main.go --version
 ```
 
 Use minimum arguments
 ```shell
-$ cd /go/src/work/_examples/example
 $ go run main.go --id=1 --before-sts=0 --after-sts=1
 ```
 
 Use all arguments
 ```shell
-$ cd /go/src/work/_examples/example
 $ go run main.go --type=ini --path=mysql.dsn --section=example_section --timeout=5s --id=1 --before-sts=0 --after-sts=1
 ```
 

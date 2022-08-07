@@ -6,14 +6,34 @@
 
 ## Install
 
-Build some Docker containers and generate `users` table in MySQL and PostgreSQL.
+Build some Docker containers and create a `users` table in MySQL and PostgreSQL.
 ```shell
 $ git clone https://github.com/exaream/go-db.git
 $ cd go-db
 $ docker compose up -d --build
 ```
 
-Login `go_db_app` container for using Go.
+### Directory Structure
+
+```
+$ tree -L 1
+.
+├── Makefile *For an environment where "make" command can be used
+├── README.md
+├── _development *For setting up your local environment.
+├── cmd
+├── dbutil ※Principle package in this git repository.
+├── docker-compose.yml
+├── example *A tool for updating "status" column of "users" table.
+├── go.mod
+├── go.sum
+└── testdata
+```
+
+## Usage
+
+### Login
+
 ```shell
 $ docker exec -it go_db_app sh
 ```
@@ -27,18 +47,16 @@ $ go run main.go --setup --path=mysql.dsn
 $ go run main.go --setup --path=pgsql.dsn
 ```
 
-## Usage
-
 ### Example
 
-`example` package is a simple tool for updating `status` column of `users` table.  
+`example` package is a simple app using `dbutil` package for updating `status` column of `users` table.
 Move to the following directory in `go_db_app` container.
 ```shell
 $ cd /go/src/work/cmd/example
 ```
 
 Show help
-```shell
+```
 $ go run main.go --help
 usage: example [<flags>]
 

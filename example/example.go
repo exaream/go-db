@@ -1,4 +1,4 @@
-// An example package to operate MySQL and PostgreSQL.
+// Package example is a simple tool for updating column status of table users.
 package example
 
 import (

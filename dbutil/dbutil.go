@@ -1,4 +1,4 @@
-// A utility package for operating MySQL and PostgreSQL.
+// Package dbutil provides general purpose functions for operating MySQL and PostgreSQL.
 package dbutil
 
 import (

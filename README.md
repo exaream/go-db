@@ -2,7 +2,7 @@
 
 ## Overview
 
-`dbutil` package is Go's CLI tool for operating MySQL and PostgreSQL.
+Package `dbutil` provides general purpose functions for operating MySQL and PostgreSQL.
 
 ## Install
 
@@ -18,13 +18,13 @@ $ docker compose up -d --build
 ```
 $ tree -L 1
 .
-├── Makefile *For an environment where "make" command can be used
+├── Makefile     *Only for environments where the "make" command is available.
 ├── README.md
 ├── _development *For setting up your local environment.
 ├── cmd
-├── dbutil ※Principle package in this git repository.
+├── dbutil       *Principle package in this git repository.
 ├── docker-compose.yml
-├── example *A tool for updating "status" column of "users" table.
+├── example      *A tool for updating "status" column of "users" table.
 ├── go.mod
 ├── go.sum
 └── testdata
@@ -48,8 +48,7 @@ $ go run main.go --setup --path=pgsql.dsn
 ```
 
 ### Example
-
-`example` package is a simple app using `dbutil` package for updating `status` column of `users` table.
+Package `example` is a simple tool for updating column `status` of table `users`.  
 Move to the following directory in `go_db_app` container.
 ```shell
 $ cd /go/src/work/cmd/example

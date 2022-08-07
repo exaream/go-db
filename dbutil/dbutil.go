@@ -1,4 +1,4 @@
-// A utility package for DB operations.
+// A utility package for operating MySQL and PostgreSQL.
 package dbutil
 
 import (

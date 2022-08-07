@@ -38,7 +38,7 @@ $ tree -L 1
 $ docker exec -it go_db_app sh
 ```
 
-## Setup
+### Setup
 
 Generate initial data as you like.
 ```shell

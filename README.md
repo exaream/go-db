@@ -49,7 +49,7 @@ $ go run main.go --setup --path=pgsql.dsn
 
 ### Example
 
-`example` package is a simple app using `dbutil` package for updating `status` column of `users` table.
+`example` package is a simple app using `dbutil` package for updating `status` column of `users` table.  
 Move to the following directory in `go_db_app` container.
 ```shell
 $ cd /go/src/work/cmd/example

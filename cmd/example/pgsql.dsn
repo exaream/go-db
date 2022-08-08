@@ -9,4 +9,4 @@ password = "ZXhhbXBsZXBhc3N3ZA==" ; base64-encoded value of "examplepasswd"
 protocol = tcp
 port     = 5432
 tz       = Asia/Tokyo
-SSLMode  = disable
+sslmode  = disable

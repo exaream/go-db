@@ -123,8 +123,8 @@ func expectedConfig(t *testing.T, dbType string) *dbutil.Config {
 		cfg.Host = pgsqlHost
 		cfg.Port = pgsqlPort
 		cfg.Driver = pgsqlDriver
-		cfg.DataSrc = dbutil.ExportDataSrcPgSQL(cfg)
 		cfg.SSLMode = cfgSSLMode
+		cfg.DataSrc = dbutil.ExportDataSrcPgSQL(cfg)
 		return cfg
 	default:
 		return nil
@@ -132,14 +132,16 @@ func expectedConfig(t *testing.T, dbType string) *dbutil.Config {
 }
 
 // fakeUsers returns fake user list.
-func fakeUsers(min, max uint) (users []User) {
+func fakeUsers(min, max uint) []*User {
 	if min == 0 || max == 0 {
-		return users
+		return nil
 	}
 
+	users := make([]*User, 0, max)
 	now := time.Now()
+
 	for i := min; i <= max; i++ {
-		users = append(users, User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
+		users = append(users, &User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
 	}
 
 	return users

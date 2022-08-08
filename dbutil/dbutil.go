@@ -49,7 +49,7 @@ func SelectContext[T any](ctx context.Context, db *sqlx.DB, query string, args m
 		return nil, err
 	}
 
-	list := make([]T, 0)
+	var list []T
 	for rows.Next() {
 		var row T
 		if err := rows.StructScan(&row); err != nil {
@@ -69,7 +69,7 @@ func SelectTxContext[T any](ctx context.Context, tx *sqlx.Tx, query string, args
 		return nil, err
 	}
 
-	list := make([]T, 0)
+	var list []T
 	for rows.Next() {
 		var row T
 		if err := rows.StructScan(&row); err != nil {

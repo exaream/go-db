@@ -43,19 +43,19 @@ func OpenContext(ctx context.Context, cfg *Config) (db *sqlx.DB, err error) {
 }
 
 // SelectContext runs SELECT and returns the results.
-func SelectContext[T any](ctx context.Context, db *sqlx.DB, query string, args map[string]any) ([]T, error) {
+func SelectContext[T any](ctx context.Context, db *sqlx.DB, query string, args map[string]any) ([]*T, error) {
 	rows, err := sqlx.NamedQueryContext(ctx, db, query, args)
 	if err != nil {
 		return nil, err
 	}
 
-	var list []T
+	var list []*T
 	for rows.Next() {
 		var row T
 		if err := rows.StructScan(&row); err != nil {
 			return nil, err
 		}
-		list = append(list, row)
+		list = append(list, &row)
 		fmt.Println(row)
 	}
 
@@ -63,19 +63,19 @@ func SelectContext[T any](ctx context.Context, db *sqlx.DB, query string, args m
 }
 
 // SelectTxContext runs SELECT and returns the results on transaction.
-func SelectTxContext[T any](ctx context.Context, tx *sqlx.Tx, query string, args map[string]any) ([]T, error) {
+func SelectTxContext[T any](ctx context.Context, tx *sqlx.Tx, query string, args map[string]any) ([]*T, error) {
 	rows, err := sqlx.NamedQueryContext(ctx, tx, query, args)
 	if err != nil {
 		return nil, err
 	}
 
-	var list []T
+	var list []*T
 	for rows.Next() {
 		var row T
 		if err := rows.StructScan(&row); err != nil {
 			return nil, multierr.Append(err, tx.Rollback())
 		}
-		list = append(list, row)
+		list = append(list, &row)
 		fmt.Println(row)
 	}
 
@@ -99,7 +99,7 @@ func UpdateTxContext(ctx context.Context, tx *sqlx.Tx, query string, args map[st
 
 // BulkInsertTxContext executes Bulk Insert on context and transaction.
 // TODO: Too many arguments?
-func BulkInsertTxContext[T any](ctx context.Context, tx *sqlx.Tx, fn func(i, j uint) []T, query string, min, max, chunkSize uint) (int64, error) {
+func BulkInsertTxContext[T any](ctx context.Context, tx *sqlx.Tx, fn func(i, j uint) []*T, query string, min, max, chunkSize uint) (int64, error) {
 	var i uint
 	var total int64
 

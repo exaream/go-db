@@ -132,4 +132,5 @@ $ go tool cover -html=cover.out -o cover.html
 ```
 
 ## TODO
-* Create a mechanism to avoid DB conflicts during testing by referring to [spool](https://github.com/cloudspannerecosystem/spool).
+- Create a mechanism to avoid DB conflicts during testing by referring to [spool](https://github.com/cloudspannerecosystem/spool).
+- Generate CLI tools by using [skeletonkit](https://github.com/gostaticanalysis/skeletonkit).

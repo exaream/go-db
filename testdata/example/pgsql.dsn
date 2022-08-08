@@ -1,6 +1,5 @@
 ; The following is the DB connection info for a local/test env.
 ; Never use the following in your production env.
-
 [test_example_section]
 type     = pgsql
 host     = go_db_pgsql
@@ -10,3 +9,4 @@ password = "ZXhhbXBsZXBhc3N3ZA==" ; base64-encoded value of "examplepasswd"
 protocol = tcp
 port     = 5432
 tz       = Asia/Tokyo
+sslmode  = disable

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/exaream/go-db/dbutil"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestParseConfig(t *testing.T) {
@@ -28,26 +29,8 @@ func TestParseConfig(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if got.Host != want.Host {
-				t.Fatalf("host want: %s, got: %s", want.Host, got.Host)
-			}
-			if got.Database != want.Database {
-				t.Fatalf("database want: %s, got: %s", want.Database, got.Database)
-			}
-			if got.Username != want.Username {
-				t.Fatalf("username want: %s, got: %s", want.Username, got.Username)
-			}
-			if got.Password != want.Password {
-				t.Fatalf("password want: %s, got: %s", want.Password, got.Password)
-			}
-			if got.Protocol != want.Protocol {
-				t.Fatalf("protocol want: %s, got: %s", want.Protocol, got.Protocol)
-			}
-			if got.Port != want.Port {
-				t.Fatalf("port want: %d, got: %d", want.Port, got.Port)
-			}
-			if got.Tz != want.Tz {
-				t.Fatalf("timezone want: %s, got: %s", want.Tz, got.Tz)
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Error(diff)
 			}
 		})
 	}

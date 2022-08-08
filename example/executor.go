@@ -42,7 +42,7 @@ func (ex *Executor) prepare(ctx context.Context, cond *Cond) error {
 		return err
 	}
 
-	if len(rows) <= 0 {
+	if len(rows) < 1 {
 		return errors.New("there is no target rows")
 	}
 
@@ -59,7 +59,7 @@ func (ex *Executor) exec(ctx context.Context, cond *Cond) error {
 		return err
 	}
 
-	if num <= 0 {
+	if num < 1 {
 		return multierr.Append(errors.New("there is no affected rows"), tx.Rollback())
 	}
 
@@ -69,7 +69,7 @@ func (ex *Executor) exec(ctx context.Context, cond *Cond) error {
 		return err
 	}
 
-	if len(rows) <= 0 {
+	if len(rows) < 1 {
 		return multierr.Append(errors.New("there is no target rows"), tx.Rollback())
 	}
 
@@ -88,7 +88,7 @@ func (ex *Executor) teardown(ctx context.Context, cond *Cond) error {
 		return err
 	}
 
-	if len(rows) <= 0 {
+	if len(rows) < 1 {
 		return errors.New("there is no affected rows")
 	}
 

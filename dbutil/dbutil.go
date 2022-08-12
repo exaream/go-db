@@ -11,6 +11,8 @@ import (
 	"go.uber.org/multierr"
 )
 
+type stringConstant string
+
 // NewDBContext returns DB handle.
 func NewDBContext(ctx context.Context, f *ConfigFile) (*sqlx.DB, error) {
 	cfg, err := ParseConfig(f.Type, f.Path, f.Section)
@@ -43,8 +45,8 @@ func OpenContext(ctx context.Context, cfg *Config) (db *sqlx.DB, err error) {
 }
 
 // SelectContext runs SELECT and returns the results.
-func SelectContext[T any](ctx context.Context, db *sqlx.DB, query string, args map[string]any) ([]*T, error) {
-	rows, err := sqlx.NamedQueryContext(ctx, db, query, args)
+func SelectContext[T any](ctx context.Context, db *sqlx.DB, query stringConstant, args map[string]any) ([]*T, error) {
+	rows, err := sqlx.NamedQueryContext(ctx, db, string(query), args)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +65,8 @@ func SelectContext[T any](ctx context.Context, db *sqlx.DB, query string, args m
 }
 
 // SelectTxContext runs SELECT and returns the results on transaction.
-func SelectTxContext[T any](ctx context.Context, tx *sqlx.Tx, query string, args map[string]any) ([]*T, error) {
-	rows, err := sqlx.NamedQueryContext(ctx, tx, query, args)
+func SelectTxContext[T any](ctx context.Context, tx *sqlx.Tx, query stringConstant, args map[string]any) ([]*T, error) {
+	rows, err := sqlx.NamedQueryContext(ctx, tx, string(query), args)
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +85,8 @@ func SelectTxContext[T any](ctx context.Context, tx *sqlx.Tx, query string, args
 }
 
 // UpdateTxContext runs UPDATE on transaction.
-func UpdateTxContext(ctx context.Context, tx *sqlx.Tx, query string, args map[string]any) (int64, error) {
-	result, err := sqlx.NamedExecContext(ctx, tx, query, args)
+func UpdateTxContext(ctx context.Context, tx *sqlx.Tx, query stringConstant, args map[string]any) (int64, error) {
+	result, err := sqlx.NamedExecContext(ctx, tx, string(query), args)
 	if err != nil {
 		return 0, multierr.Append(err, tx.Rollback())
 	}
@@ -99,17 +101,18 @@ func UpdateTxContext(ctx context.Context, tx *sqlx.Tx, query string, args map[st
 
 // BulkInsertTxContext executes Bulk Insert on context and transaction.
 // TODO: Too many arguments?
-func BulkInsertTxContext[T any](ctx context.Context, tx *sqlx.Tx, fn func(i, j uint) []*T, query string, min, max, chunkSize uint) (int64, error) {
+func BulkInsertTxContext[T any](ctx context.Context, tx *sqlx.Tx, fn func(i, j uint) []*T, query stringConstant, min, max, chunkSize uint) (int64, error) {
 	var i uint
 	var total int64
 
+	queryStr := string(query)
 	for i = min; i <= max; i += chunkSize {
 		j := i + chunkSize - min
 		if j > max {
 			j = max
 		}
 
-		result, err := tx.NamedExecContext(ctx, query, fn(i, j))
+		result, err := tx.NamedExecContext(ctx, queryStr, fn(i, j))
 		if err != nil {
 			return 0, multierr.Append(err, tx.Rollback())
 		}

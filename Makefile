@@ -44,6 +44,10 @@ setup:
 	go run $(CMD_DIR)/main.go --setup --path=$(CMD_DIR)/mysql.dsn
 	go run $(CMD_DIR)/main.go --setup --path=$(CMD_DIR)/pgsql.dsn
 
+.PHONY: vulncheck
+vulncheck:
+	govulncheck ./...
+
 .PHONY: build
 build:
 	go build -o $(CMD_DIR)/example $(CMD_DIR)/main.go

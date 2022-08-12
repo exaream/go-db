@@ -22,6 +22,7 @@ USER sampleuser
 
 # Install Go packages.
 RUN go install github.com/kisielk/errcheck@latest && \
+    go install golang.org/x/vuln/cmd/govulncheck@latest && \
     curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest && \
     cd /go/src/work && \
     go mod tidy

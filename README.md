@@ -42,7 +42,7 @@ $ docker exec -it go_db_app sh
 
 Generate initial data as you like.
 ```shell
-$ cd /go/src/work/examples/cmd/example
+$ cd /go/src/work/examples/example/cmd
 $ go run main.go --setup --path=mysql.dsn
 $ go run main.go --setup --path=pgsql.dsn
 ```
@@ -51,7 +51,7 @@ $ go run main.go --setup --path=pgsql.dsn
 Package `example` is a simple tool for updating column `status` of table `users`.  
 Move to the following directory in `go_db_app` container.
 ```shell
-$ cd /go/src/work/examples/cmd/example
+$ cd /go/src/work/examples/example/cmd
 ```
 
 Show help

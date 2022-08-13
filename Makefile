@@ -1,6 +1,6 @@
 MAKEFILE_DIR := $(shell pwd)
-EXAMPLES_DIR := $(MAKEFILE_DIR)/cmd
-CMD_DIR := $(EXAMPLES_DIR)/example
+EXAMPLES_DIR := $(MAKEFILE_DIR)/examples
+CMD_DIR := $(EXAMPLES_DIR)/example/cmd
 MYSQL_DIR := $(MAKEFILE_DIR)/_development/mysql/storage
 POSTGRES_DIR := $(MAKEFILE_DIR)/_development/pgsql/storage
 PGADMIN_DIR := $(MAKEFILE_DIR)/_development/pgadmin

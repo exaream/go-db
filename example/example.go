@@ -42,7 +42,8 @@ type User struct {
 
 // User's stringer.
 func (u User) String() string {
-	return fmt.Sprintf("%d\t%s\t%v\t%s\t%s", u.ID, u.Name, u.Status, u.CreatedAt.Format(layout), u.UpdatedAt.Format(layout))
+	return fmt.Sprintf("%d\t%s\t%v\t%s\t%s",
+		u.ID, u.Name, u.Status, u.CreatedAt.Format(layout), u.UpdatedAt.Format(layout))
 }
 
 // Cond has conditions to create SQL.

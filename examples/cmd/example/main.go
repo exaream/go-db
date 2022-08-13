@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/exaream/go-db/dbutil"
-	"github.com/exaream/go-db/example"
+	"github.com/exaream/go-db/examples/example"
 	"go.uber.org/multierr"
 	"gopkg.in/alecthomas/kingpin.v2"
 )

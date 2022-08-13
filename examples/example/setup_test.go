@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/exaream/go-db/dbutil"
-	"github.com/exaream/go-db/example"
+	"github.com/exaream/go-db/examples/example"
 )
 
 func TestSetup(t *testing.T) {

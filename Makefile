@@ -47,7 +47,6 @@ setup:
 .PHONY: check
 check:
 	govulncheck ./...
-	staticcheck ./...
 	golangci-lint run
 
 .PHONY: build

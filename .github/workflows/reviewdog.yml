@@ -16,12 +16,3 @@ jobs:
           golangci_lint_flags: "--config=../../golangci.yml"
           filter_mode: nofilter
           reporter: github-pr-review
-  staticcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: reviewdog/action-staticcheck@v1
-        with:
-          github_token: ${{ github.token }}
-          filter_mode: nofilter
-          reporter: github-pr-review

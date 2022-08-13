@@ -7,12 +7,12 @@ linters:
     - deadcode
     - depguard
     - dogsled
-    - dupl
-    - errcheck
+    - dupl # For finding code clones.
+    - errcheck # For checking for unchecked errors.
     - exportloopref
     - funlen
-    - goconst
-    - gocyclo
+    - goconst # For finding repeated strings that could be replaced by a constant.
+    - gocyclo # For calculating cyclomatic complexities.
     - gofmt
     - goimports
     - gomnd
@@ -20,18 +20,19 @@ linters:
     - gosec
     - gosimple
     - govet
-    - ineffassign
+    - ineffassign # For detecting ineffectual assignments.
     - lll
-    - misspell
+    - misspell # For correcting commonly misspelled English words.
     - nakedret
     - noctx
     - nolintlint
+    - prealloc # For finding slice declarations that could potentially be preallocated.
     - staticcheck
     - stylecheck
     - typecheck
-    - unconvert
-    - unparam
-    - unused
+    - unconvert # For identifying unnecessary type conversions.
+    - unparam # For finding unused function parameters.
+    - unused # For finding unused code.
     - varcheck
     - whitespace
 

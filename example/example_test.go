@@ -13,11 +13,11 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	if err := initDB(mysqlDBType, beforeSqlPath); err != nil {
+	if err := initDB(mysqlDBType, beforeSQLPath); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	if err := initDB(pgsqlDBType, beforeSqlPath); err != nil {
+	if err := initDB(pgsqlDBType, beforeSQLPath); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -39,7 +39,7 @@ func TestRun(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			t.Cleanup(func() {
-				prepareDB(t, tt.dbType, beforeSqlPath)
+				prepareDB(t, tt.dbType, beforeSQLPath)
 			})
 
 			cond := example.NewCond(tt.id, non, active)
@@ -71,7 +71,7 @@ func TestRunErr(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			t.Cleanup(func() {
-				prepareDB(t, tt.dbType, beforeSqlPath)
+				prepareDB(t, tt.dbType, beforeSQLPath)
 			})
 
 			cond := example.NewCond(tt.id, non, active)
@@ -100,7 +100,7 @@ func TestNewExecutor(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			t.Cleanup(func() {
-				prepareDB(t, tt.dbType, beforeSqlPath)
+				prepareDB(t, tt.dbType, beforeSQLPath)
 			})
 
 			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)

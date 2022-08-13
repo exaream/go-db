@@ -24,7 +24,7 @@ func TestPrepare(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			t.Cleanup(func() {
-				prepareDB(t, tt.dbType, beforeSqlPath)
+				prepareDB(t, tt.dbType, beforeSQLPath)
 			})
 
 			cond := example.NewCond(tt.id, non, active)
@@ -59,7 +59,7 @@ func TestPrepareErr(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			t.Cleanup(func() {
-				prepareDB(t, tt.dbType, beforeSqlPath)
+				prepareDB(t, tt.dbType, beforeSQLPath)
 			})
 
 			cond := example.NewCond(tt.id, non, active)
@@ -94,7 +94,7 @@ func TestExec(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			t.Cleanup(func() {
-				prepareDB(t, tt.dbType, beforeSqlPath)
+				prepareDB(t, tt.dbType, beforeSQLPath)
 			})
 
 			cond := example.NewCond(tt.id, non, active)
@@ -131,7 +131,7 @@ func TestExecErr(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			t.Cleanup(func() {
-				prepareDB(t, tt.dbType, beforeSqlPath)
+				prepareDB(t, tt.dbType, beforeSQLPath)
 			})
 
 			cond := example.NewCond(tt.id, non, active)
@@ -165,9 +165,9 @@ func TestTeardown(t *testing.T) {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			prepareDB(t, tt.dbType, afterSqlPath)
+			prepareDB(t, tt.dbType, afterSQLPath)
 			t.Cleanup(func() {
-				prepareDB(t, tt.dbType, beforeSqlPath)
+				prepareDB(t, tt.dbType, beforeSQLPath)
 			})
 
 			cond := example.NewCond(tt.id, non, active)
@@ -201,9 +201,9 @@ func TestTeardownErr(t *testing.T) {
 		tt := tt
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			prepareDB(t, tt.dbType, afterSqlPath)
+			prepareDB(t, tt.dbType, afterSQLPath)
 			t.Cleanup(func() {
-				prepareDB(t, tt.dbType, beforeSqlPath)
+				prepareDB(t, tt.dbType, beforeSQLPath)
 			})
 
 			cond := example.NewCond(tt.id, non, active)

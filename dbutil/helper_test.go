@@ -56,7 +56,7 @@ var (
 	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "dbutil")
 	mysqlCfgPath  = filepath.Join(testDir, "mysql.dsn")
 	pgsqlCfgPath  = filepath.Join(testDir, "pgsql.dsn")
-	beforeSqlPath = filepath.Join(testDir, "before_update.sql")
+	beforeSQLPath = filepath.Join(testDir, "before_update.sql")
 
 	// Query
 	queryTruncateTbls = map[string]string{

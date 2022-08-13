@@ -34,7 +34,7 @@ func TestSetup(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			t.Cleanup(func() {
-				prepareDB(t, tt.dbType, beforeSqlPath)
+				prepareDB(t, tt.dbType, beforeSQLPath)
 			})
 
 			cfg := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
@@ -58,7 +58,6 @@ func TestSetup(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("want: %d, got: %d", tt.want, got)
 			}
-
 		})
 	}
 }

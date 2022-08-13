@@ -2,6 +2,8 @@ package example_test
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -11,8 +13,14 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	initDB(mysqlDBType, beforeSqlPath)
-	initDB(pgsqlDBType, beforeSqlPath)
+	if err := initDB(mysqlDBType, beforeSqlPath); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := initDB(pgsqlDBType, beforeSqlPath); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	m.Run()
 }
 

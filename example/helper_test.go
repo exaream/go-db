@@ -20,26 +20,12 @@ const (
 	cfgSection = "test_example_section"
 
 	// Config MySQL
-	mysqlHost   = "go_db_mysql"
 	mysqlDBType = "mysql"
 	mysqlDriver = "mysql"
-	mysqlPort   = 3306
 
 	// Config PostgreSQL
-	pgsqlHost   = "go_db_pgsql"
 	pgsqlDBType = "pgsql"
 	pgsqlDriver = "pgx"
-	pgsqlPort   = 5432
-
-	// Dummy
-	dummy     = "dummy"
-	dummyPort = 9999
-
-	// Query
-	queryInsert = `INSERT INTO users (name, email, status, created_at, updated_at) 
-VALUES (:name, :email, :status, :created_at, :updated_at);`
-	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
-	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
 )
 
 var (

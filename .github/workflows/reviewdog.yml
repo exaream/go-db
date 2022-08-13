@@ -1,9 +1,7 @@
-name: Reviewdog
-
+name: reviewdog
 on:
   pull_request:
     types: [opened, synchronize]
-
 jobs:
   golangci-lint:
     runs-on: ubuntu-latest

@@ -93,7 +93,7 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 		cfg.Driver = pgsqlDriver
 		cfg.DataSrc = cfg.dataSrcPgSQL()
 	default:
-		return nil, errors.New("Unsupported DB type")
+		return nil, errors.New("unsupported DB type")
 	}
 
 	return cfg, nil

@@ -152,7 +152,7 @@ func TestSelectContext(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			prepareDB(t, tt.dbType, beforeSqlPath)
+			prepareDB(t, tt.dbType, beforeSQLPath)
 
 			ctx := context.Background()
 			f := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
@@ -190,7 +190,7 @@ func TestSelectTxContext(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			prepareDB(t, tt.dbType, beforeSqlPath)
+			prepareDB(t, tt.dbType, beforeSQLPath)
 
 			ctx := context.Background()
 			f := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)
@@ -235,7 +235,7 @@ func TestUpdateTxContext(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			prepareDB(t, tt.dbType, beforeSqlPath)
+			prepareDB(t, tt.dbType, beforeSQLPath)
 
 			ctx := context.Background()
 			f := dbutil.NewConfigFile(cfgType, tt.path, cfgSection)

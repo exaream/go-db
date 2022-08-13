@@ -53,7 +53,7 @@ VALUES (:name, :email, :status, :created_at, :updated_at);`
 
 var (
 	// Path
-	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "dbutil")
+	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata")
 	mysqlCfgPath  = filepath.Join(testDir, "mysql.dsn")
 	pgsqlCfgPath  = filepath.Join(testDir, "pgsql.dsn")
 	beforeSQLPath = filepath.Join(testDir, "before_update.sql")

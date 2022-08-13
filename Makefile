@@ -1,6 +1,6 @@
 MAKEFILE_DIR := $(shell pwd)
-EXAMPLES_DIR := $(MAKEFILE_DIR)/cmd
-CMD_DIR := $(EXAMPLES_DIR)/example
+EXAMPLES_DIR := $(MAKEFILE_DIR)/examples
+CMD_DIR := $(EXAMPLES_DIR)/example/cmd/example
 MYSQL_DIR := $(MAKEFILE_DIR)/_development/mysql/storage
 POSTGRES_DIR := $(MAKEFILE_DIR)/_development/pgsql/storage
 PGADMIN_DIR := $(MAKEFILE_DIR)/_development/pgadmin
@@ -51,7 +51,7 @@ check:
 
 .PHONY: build
 build:
-	go build -o $(CMD_DIR)/example $(CMD_DIR)/main.go
+	go build -buildvcs=false -o $(CMD_DIR)/example $(CMD_DIR)/main.go
 
 .PHONY: test
 test:

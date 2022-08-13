@@ -29,7 +29,7 @@ const (
 )
 
 var (
-	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "examples", "testdata", "example")
+	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "examples", "example", "testdata")
 	mysqlCfgPath  = filepath.Join(testDir, "mysql.dsn")
 	pgsqlCfgPath  = filepath.Join(testDir, "pgsql.dsn")
 	beforeSQLPath = filepath.Join(testDir, "before_update.sql")

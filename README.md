@@ -21,7 +21,6 @@ $ tree -L 1
 ├── Makefile            *Only for environments where the "make" command is available.
 ├── README.md
 ├── _development        *For setting up your local environment.
-├── cmd
 ├── dbutil              *Principle package in this git repository.
 ├── docker-compose.yml
 ├── examples/example    *A tool for updating "status" column of "users" table.
@@ -42,7 +41,7 @@ $ docker exec -it go_db_app sh
 
 Generate initial data as you like.
 ```shell
-$ cd /go/src/work/examples/cmd/example
+$ cd /go/src/work/examples/example/cmd/example
 $ go run main.go --setup --path=mysql.dsn
 $ go run main.go --setup --path=pgsql.dsn
 ```
@@ -51,7 +50,7 @@ $ go run main.go --setup --path=pgsql.dsn
 Package `example` is a simple tool for updating column `status` of table `users`.  
 Move to the following directory in `go_db_app` container.
 ```shell
-$ cd /go/src/work/examples/cmd/example
+$ cd /go/src/work/examples/example/cmd/example
 ```
 
 Show help

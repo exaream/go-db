@@ -1,9 +1,7 @@
-name: Reviewdog
-
+name: reviewdog
 on:
   pull_request:
     types: [opened, synchronize]
-
 jobs:
   golangci-lint:
     runs-on: ubuntu-latest
@@ -16,5 +14,14 @@ jobs:
           github_token: ${{ github.token }}
           level: warning
           golangci_lint_flags: "--config=../../golangci.yml"
+          filter_mode: nofilter
+          reporter: github-pr-review
+  staticcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: reviewdog/action-staticcheck@v1
+        with:
+          github_token: ${{ github.token }}
           filter_mode: nofilter
           reporter: github-pr-review

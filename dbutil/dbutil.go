@@ -3,7 +3,6 @@ package dbutil
 
 import (
 	"context"
-	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -58,7 +57,6 @@ func SelectContext[T any](ctx context.Context, db *sqlx.DB, query stringConstant
 			return nil, err
 		}
 		list = append(list, &row)
-		fmt.Println(row)
 	}
 
 	return list, nil
@@ -78,7 +76,6 @@ func SelectTxContext[T any](ctx context.Context, tx *sqlx.Tx, query stringConsta
 			return nil, multierr.Append(err, tx.Rollback())
 		}
 		list = append(list, &row)
-		fmt.Println(row)
 	}
 
 	return list, nil
@@ -100,10 +97,9 @@ func UpdateTxContext(ctx context.Context, tx *sqlx.Tx, query stringConstant, arg
 }
 
 // BulkInsertTxContext executes Bulk Insert on context and transaction.
-// TODO: Too many arguments?
 func BulkInsertTxContext[T any](ctx context.Context, tx *sqlx.Tx,
-	fn func(i, j uint) []*T, query stringConstant, min, max, chunkSize uint) (int64, error) {
-	var i uint
+	fn func(i, j int) []*T, query stringConstant, min, max, chunkSize int) (int64, error) {
+	var i int
 	var total int64
 
 	queryStr := string(query)

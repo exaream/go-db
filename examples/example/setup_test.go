@@ -13,9 +13,9 @@ func TestSetup(t *testing.T) {
 	cases := map[string]struct {
 		dbType    string
 		path      string
-		min       uint
-		max       uint
-		chunkSize uint
+		min       int
+		max       int
+		chunkSize int
 
 		want int64
 	}{
@@ -65,8 +65,8 @@ func TestSetup(t *testing.T) {
 func TestFakeUsers(t *testing.T) {
 	t.Parallel()
 	cases := map[string]struct {
-		min uint
-		max uint
+		min int
+		max int
 
 		want int
 	}{

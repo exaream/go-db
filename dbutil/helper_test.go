@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	timeout      = 5
-	active  uint = 1
-	non     uint = 0
+	timeout = 5
+	active  = 1
+	non     = 0
 
 	// Config Common
 	cfgType     = "ini"
@@ -131,7 +131,7 @@ func expectedConfig(t *testing.T, dbType string) *dbutil.Config {
 }
 
 // fakeUsers returns fake user list.
-func fakeUsers(min, max uint) []*User {
+func fakeUsers(min, max int) []*User {
 	if min == 0 || max == 0 {
 		return nil
 	}

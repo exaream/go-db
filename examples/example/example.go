@@ -32,7 +32,7 @@ var queryTruncateTbls = map[string]string{
 // Schema of users table
 // Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
 type User struct {
-	ID        uint       `db:"id"`
+	ID        int        `db:"id"`
 	Name      string     `db:"name"`
 	Email     string     `db:"email"`
 	Status    int        `db:"status"`
@@ -48,13 +48,13 @@ func (u User) String() string {
 
 // Cond has conditions to create SQL.
 type Cond struct {
-	id        uint
-	beforeSts uint
-	afterSts  uint
+	id        int
+	beforeSts int
+	afterSts  int
 }
 
 // NewCond returns conditions to create SQL.
-func NewCond(id, beforeSts, afterSts uint) *Cond {
+func NewCond(id, beforeSts, afterSts int) *Cond {
 	return &Cond{
 		id:        id,
 		beforeSts: beforeSts,

@@ -11,10 +11,10 @@ import (
 // Schema of users table
 // Please use exported struct and fields because dbutil package handle these. (rows.StructScan)
 type User struct {
-	ID        uint       `db:"id"`
+	ID        int        `db:"id"`
 	Name      string     `db:"name"`
 	Email     string     `db:"email"`
-	Status    uint       `db:"status"`
+	Status    int        `db:"status"`
 	CreatedAt *time.Time `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
 }
@@ -266,8 +266,6 @@ func TestUpdateTxContext(t *testing.T) {
 	}
 }
 
-// TODO: Confirm why int type is chosen over uint type. e.g. result.RowsAffected()
-// SEE:  https://github.com/golang/go/issues/49311
 func TestBulkInsertTxContext(t *testing.T) {
 	cases := map[string]struct {
 		path string
@@ -289,7 +287,7 @@ func TestBulkInsertTxContext(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			var min, max, chunkSize uint = 1, 5000, 1000
+			var min, max, chunkSize = 1, 5000, 1000
 			tx := db.MustBeginTx(ctx, nil)
 
 			num, err := dbutil.BulkInsertTxContext(ctx, tx, fakeUsers, queryInsert, min, max, chunkSize)

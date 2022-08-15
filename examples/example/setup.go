@@ -11,7 +11,7 @@ import (
 )
 
 // Setup generates initial data.
-func Setup(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize uint) (total int64, err error) {
+func Setup(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize int) (total int64, err error) {
 	db, err := dbutil.NewDBContext(ctx, cfg)
 	if err != nil {
 		return 0, err
@@ -43,7 +43,7 @@ func Setup(ctx context.Context, cfg *dbutil.ConfigFile, min, max, chunkSize uint
 }
 
 // fakeUsers returns fake user list.
-func fakeUsers(min, max uint) []*User {
+func fakeUsers(min, max int) []*User {
 	if min == 0 || max == 0 {
 		return nil
 	}

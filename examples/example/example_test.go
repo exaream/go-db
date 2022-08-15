@@ -28,7 +28,7 @@ func TestRun(t *testing.T) {
 	cases := map[string]struct {
 		dbType string
 		path   string
-		id     uint
+		id     int
 	}{
 		"mysql": {mysqlDBType, mysqlCfgPath, 1},
 		"pgsql": {pgsqlDBType, pgsqlCfgPath, 1},
@@ -60,7 +60,7 @@ func TestRunErr(t *testing.T) {
 	cases := map[string]struct {
 		dbType string
 		path   string
-		id     uint
+		id     int
 	}{
 		"mysql": {mysqlDBType, mysqlCfgPath, 0},
 		"pgsql": {pgsqlDBType, pgsqlCfgPath, 0},

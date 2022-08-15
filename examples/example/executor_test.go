@@ -13,7 +13,7 @@ func TestPrepare(t *testing.T) {
 	cases := map[string]struct {
 		dbType string
 		path   string
-		id     uint
+		id     int
 	}{
 		"mysql": {mysqlDBType, mysqlCfgPath, 1},
 		"pgsql": {pgsqlDBType, pgsqlCfgPath, 1},
@@ -48,7 +48,7 @@ func TestPrepareErr(t *testing.T) {
 	cases := map[string]struct {
 		dbType string
 		path   string
-		id     uint
+		id     int
 	}{
 		"mysql": {mysqlDBType, mysqlCfgPath, 0},
 		"pgsql": {pgsqlDBType, pgsqlCfgPath, 0},
@@ -83,7 +83,7 @@ func TestExec(t *testing.T) {
 	cases := map[string]struct {
 		dbType string
 		path   string
-		id     uint
+		id     int
 	}{
 		"mysql": {mysqlDBType, mysqlCfgPath, 1},
 		"pgsql": {pgsqlDBType, pgsqlCfgPath, 1},
@@ -120,7 +120,7 @@ func TestExecErr(t *testing.T) {
 	cases := map[string]struct {
 		dbType string
 		path   string
-		id     uint
+		id     int
 	}{
 		"mysql": {mysqlDBType, mysqlCfgPath, 0},
 		"pgsql": {pgsqlDBType, pgsqlCfgPath, 0},
@@ -155,7 +155,7 @@ func TestTeardown(t *testing.T) {
 	cases := map[string]struct {
 		dbType string
 		path   string
-		id     uint
+		id     int
 	}{
 		"mysql": {mysqlDBType, mysqlCfgPath, 1},
 		"pgsql": {pgsqlDBType, pgsqlCfgPath, 1},
@@ -191,7 +191,7 @@ func TestTeardownErr(t *testing.T) {
 	cases := map[string]struct {
 		dbType string
 		path   string
-		id     uint
+		id     int
 	}{
 		"mysql": {mysqlDBType, mysqlCfgPath, 0},
 		"pgsql": {pgsqlDBType, pgsqlCfgPath, 0},

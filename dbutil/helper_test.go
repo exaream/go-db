@@ -14,18 +14,19 @@ import (
 )
 
 const (
-	timeout      = 5
-	active  uint = 1
-	non     uint = 0
+	timeout = 5
+	active  = 1
+	non     = 0
 
 	// Config Common
 	cfgType     = "ini"
-	cfgSection  = "dbutil_test_section"
-	cfgDatabase = "example_db_dbutil_pkg_test"
+	cfgSection  = "test_dbutil_section"
+	cfgDatabase = "test_dbutil_db"
 	cfgUsername = "exampleuser"
 	cfgPassword = "examplepasswd"
 	cfgProtocol = "tcp"
 	cfgTz       = "Asia/Tokyo"
+	cfgSSLMode  = "disable" // for PostgreSQL
 
 	// Config MySQL
 	mysqlHost   = "go_db_mysql"
@@ -45,23 +46,22 @@ const (
 
 	// Query
 	queryInsert = `INSERT INTO users (name, email, status, created_at, updated_at) 
-VALUES (:name, :email, :status, :created_at, :updated_at)`
+VALUES (:name, :email, :status, :created_at, :updated_at);`
 	querySelect = `SELECT id, name, status, created_at, updated_at FROM users WHERE id = :id AND status = :status;`
 	queryUpdate = `UPDATE users SET status = :afterSts, updated_at = NOW() WHERE id = :id AND status = :beforeSts;`
 )
 
 var (
 	// Path
-	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata", "example")
+	testDir       = string(filepath.Separator) + filepath.Join("go", "src", "work", "testdata")
 	mysqlCfgPath  = filepath.Join(testDir, "mysql.dsn")
 	pgsqlCfgPath  = filepath.Join(testDir, "pgsql.dsn")
-	beforeSqlPath = filepath.Join(testDir, "before_update.sql")
-	afterSqlPath  = filepath.Join(testDir, "after_update.sql")
+	beforeSQLPath = filepath.Join(testDir, "before_update.sql")
 
 	// Query
 	queryTruncateTbls = map[string]string{
-		"mysql": `TRUNCATE TABLE users`,
-		"pgsql": `TRUNCATE TABLE users RESTART IDENTITY`,
+		mysqlDriver: `TRUNCATE TABLE users;`,
+		pgsqlDriver: `TRUNCATE TABLE users RESTART IDENTITY;`,
 	}
 )
 
@@ -85,8 +85,9 @@ func prepareDB(t *testing.T, dbType, sqlPath string) {
 		t.Fatal(err)
 	}
 
+	queryTruncateTbl := queryTruncateTbls[db.DriverName()]
 	args := make(map[string]any)
-	_, err = sqlx.NamedExecContext(ctx, db, queryTruncateTbls[dbType], args)
+	_, err = sqlx.NamedExecContext(ctx, db, queryTruncateTbl, args)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,8 +98,8 @@ func prepareDB(t *testing.T, dbType, sqlPath string) {
 	}
 }
 
-// wantConfig returns the Config that tests expect.
-func wantedConfig(t *testing.T, dbType string) *dbutil.Config {
+// expectedConfig returns the Config that tests expect.
+func expectedConfig(t *testing.T, dbType string) *dbutil.Config {
 	t.Helper()
 
 	cfg := &dbutil.Config{
@@ -115,13 +116,14 @@ func wantedConfig(t *testing.T, dbType string) *dbutil.Config {
 		cfg.Host = mysqlHost
 		cfg.Port = mysqlPort
 		cfg.Driver = mysqlDriver
-		cfg.Src = dbutil.ExportDataSrcMySQL(cfg)
+		cfg.DataSrc = dbutil.ExportDataSrcMySQL(cfg)
 		return cfg
 	case pgsqlDBType:
 		cfg.Host = pgsqlHost
 		cfg.Port = pgsqlPort
 		cfg.Driver = pgsqlDriver
-		cfg.Src = dbutil.ExportDataSrcPgSQL(cfg)
+		cfg.SSLMode = cfgSSLMode
+		cfg.DataSrc = dbutil.ExportDataSrcPgSQL(cfg)
 		return cfg
 	default:
 		return nil
@@ -129,16 +131,17 @@ func wantedConfig(t *testing.T, dbType string) *dbutil.Config {
 }
 
 // fakeUsers returns fake user list.
-// TODO: Confirm how to pass *testing.T as an argument.
-func fakeUsers(min, max uint) (list []userWithoutID) {
+func fakeUsers(min, max int) []*User {
 	if min == 0 || max == 0 {
-		return list
+		return nil
 	}
 
+	users := make([]*User, 0, max)
 	now := time.Now()
+
 	for i := min; i <= max; i++ {
-		list = append(list, userWithoutID{gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
+		users = append(users, &User{i, gimei.NewName().Kanji(), faker.Email(), 0, &now, &now})
 	}
 
-	return list
+	return users
 }

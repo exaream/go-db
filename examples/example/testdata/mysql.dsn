@@ -1,0 +1,12 @@
+; The following is the DB connection info for a local/test env.
+; Never use the following in your production env.
+
+[test_example_section]
+type     = mysql
+host     = go_db_mysql
+database = test_example_db
+username = exampleuser
+password = "ZXhhbXBsZXBhc3N3ZA==" ; base64-encoded value of "examplepasswd"
+protocol = tcp
+port     = 3306
+tz       = Asia/Tokyo

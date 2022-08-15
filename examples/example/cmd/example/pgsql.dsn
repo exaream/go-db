@@ -1,0 +1,12 @@
+; The following is the DB connection info for a local env.
+; Never use the following in your production env.
+[example_section]
+type     = pgsql
+host     = go_db_pgsql
+database = example_db
+username = exampleuser
+password = "ZXhhbXBsZXBhc3N3ZA==" ; base64-encoded value of "examplepasswd"
+protocol = tcp
+port     = 5432
+tz       = Asia/Tokyo
+sslmode  = disable

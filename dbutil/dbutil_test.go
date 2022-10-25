@@ -126,7 +126,11 @@ func TestOpenContextErr(t *testing.T) {
 
 			switch tt.dbType {
 			case mysqlDBType:
-				cfg.DataSrc = dbutil.ExportDataSrcMySQL(cfg)
+				dsn, err := dbutil.ExportDataSrcMySQL(cfg)
+				if err != nil {
+					t.Fatal(err)
+				}
+				cfg.DataSrc = dsn
 			case pgsqlDBType:
 				cfg.DataSrc = dbutil.ExportDataSrcPgSQL(cfg)
 			}

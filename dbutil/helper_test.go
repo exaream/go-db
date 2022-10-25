@@ -116,7 +116,11 @@ func expectedConfig(t *testing.T, dbType string) *dbutil.Config {
 		cfg.Host = mysqlHost
 		cfg.Port = mysqlPort
 		cfg.Driver = mysqlDriver
-		cfg.DataSrc = dbutil.ExportDataSrcMySQL(cfg)
+		dsn, err := dbutil.ExportDataSrcMySQL(cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cfg.DataSrc = dsn
 		return cfg
 	case pgsqlDBType:
 		cfg.Host = pgsqlHost

@@ -4,9 +4,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"net/url"
 	"os"
+	"time"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/spf13/viper"
 )
 
@@ -88,7 +89,11 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 	switch cfg.Type {
 	case mysqlDBType:
 		cfg.Driver = mysqlDriver
-		cfg.DataSrc = cfg.dataSrcMySQL()
+		dsn, err := cfg.dataSrcMySQL()
+		if err != nil {
+			return nil, err
+		}
+		cfg.DataSrc = dsn
 	case pgsqlDBType:
 		cfg.Driver = pgsqlDriver
 		cfg.DataSrc = cfg.dataSrcPgSQL()
@@ -100,14 +105,22 @@ func ParseConfig(typ, path, section string) (*Config, error) {
 }
 
 // dataSrcMySQL returns data source name for MySQL.
-func (cfg *Config) dataSrcMySQL() string {
-	dsn := fmt.Sprintf("%s:%s@%s(%s:%d)/%s",
-		cfg.Username, cfg.Password, cfg.Protocol, cfg.Host, cfg.Port, cfg.Database)
-
-	params := url.Values{"parseTime": {"true"}, "loc": {cfg.Tz},
-		"interpolateParams": {"true"}, "collation": {"utf8mb4_bin"}}
-
-	return dsn + "?" + params.Encode()
+func (cfg *Config) dataSrcMySQL() (string, error) {
+	jst, err := time.LoadLocation(cfg.Tz)
+	if err != nil {
+		return "", err
+	}
+	c := mysql.Config{
+		DBName:    cfg.Database,
+		User:      cfg.Username,
+		Passwd:    cfg.Password,
+		Addr:      fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		Net:       cfg.Protocol,
+		ParseTime: true,
+		Collation: "utf8mb4_bin",
+		Loc:       jst,
+	}
+	return c.FormatDSN(), nil
 }
 
 // dataSrcPgSQL returns data source name for PostgreSQL.
